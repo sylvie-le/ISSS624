@@ -1,12 +1,28 @@
 ---
-title: "Hands-on Exercise 1"
+title: "Hands-on Exercise 1: Geospatial Wrangling with R"
 editor: visual
 ---
 
-## Overview
+## **Overview**
 
-This is the overview paragraph.
+In this hands-on exercise, I learn how to import and wrangle geospatial data using appropriate R packages.
 
-## Getting Started
+## **Getting Started**
 
-This is the getting started paragraph.
+The code chunk below installs and loads sf and tidyverse.
+
+*Notes:* Make sure you imported the pacman package before running the code below.
+
+```{r}
+pacman::p_load(sf, tidyverse)
+```
+
+## **Import Geospatial Data**
+
+### Import polygon feature data
+
+*Notes:* You need to save your working R document as an qmd file before you can run the code below.
+
+```{r}
+mpsz <- st_read(dsn = "Hands-on_Ex01/data/geospatial", layer = "MP14_SUBZONE_WEB_PL")
+```
