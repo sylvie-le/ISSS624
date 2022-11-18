@@ -91,7 +91,7 @@ Or we can plot and view a specific attribute.
 plot(mpsz["PLN_AREA_N"])
 ```
 
-*Notes: plot is only used for a quickly. For high cartographic quality plot, use tmap R package.*
+> Notes: plot is only used for a quickly. For high cartographic quality plot, use tmap R package.
 
 ## Working with Projection
 
@@ -107,7 +107,7 @@ Using the code chunk below, we can see the coordinate system of `mpsz`.
 st_crs(mpsz)
 ```
 
-Notice the `User input` says the data is projected in `svy21`, but the EPSG code is `9001`. This is a wrong EPSG code because the EPSG code for svy21 should be [3414](https://epsg.io/3414).
+> Notice the `User input` says the data is projected in `svy21`, but the EPSG code is `9001`. This is a wrong EPSG code because the EPSG code for svy21 should be [3414](https://epsg.io/3414).
 
 We now assign the correct EPSG code using the code below.
 
@@ -122,3 +122,68 @@ st_crs(mpsz3414)
 ```
 
 ### Transform the projection of preschool from wgs84 to svy21
+
+Now we inspect the geometry of `preschool`. It is clear that preschool is projected in the WGS84 coordinate system.
+
+```{r}
+st_geometry(preschool)
+```
+
+We will transform the projection of preschool to svy21 using `st_transform`.
+
+```{r}
+preschool3414 <- st_transform(preschool, crs = 3414)
+```
+
+Now we can inspect the geometry of `preschool3414`, which is now projected in svy21 coordinate system.
+
+```{r}
+st_geometry(preschool3414)
+```
+
+> *Notes*: in `Bounding box`, the values are greater than 0-360 range of decimal degree commonly used by most of the geographic coordinate systems.
+
+## Importing and Converting an Aspatial Data
+
+### Import aspatial data
+
+Because the listings dataset is in the csv format, we use the `read.csv()` function to import the data into an object called `listings`, which is a [tibble data frame](https://r4ds.had.co.nz/tibbles.html).
+
+```{r}
+listings <- read.csv("data/aspatial/listings.csv")
+```
+
+To inspect the data set, instead of using `glimpse`, now we use `list` because of the object type.
+
+```{r}
+list(listings)
+```
+
+We can see that `listings` has 4,252 rows and 16 columns. We are going to use `latitude` and `longitude`.
+
+> Note that they are in decimal degree format. As a best guess, we will assume that the data is in **wgs84** Geographic Coordinate System.
+
+### Create a simple feature data frame
+
+We now convert `listings` into a simple feature data frame using `st_as_sf()`.
+
+```{r}
+listings_sf <- st_as_sf(listings, coords = c("longitude", "latitude"), crs = 4326) %>%
+  st_transform(crs = 3414)
+```
+
+**Notes**
+
+> -   *coords* argument requires you to provide the column name of the x-coordinates first then followed by the column name of the y-coordinates.
+>
+> -   *crs* argument requires you to provide the coordinates system in epsg format. [EPSG: 4326](https://epsg.io/4326) is wgs84 Geographic Coordinate System and [EPSG: 3414](https://epsg.io/3414) is Singapore SVY21 Projected Coordinate System. You can search for other country\'s epsg code by referring to [epsg.io](https://epsg.io/).
+>
+> -   *%\>%* is used to nest *st_transform()* to transform the newly created simple feature data frame into svy21 projected coordinates system.
+
+After the transformation, we can examine the new object `listings_sf` using `glimpse`.
+
+```{r}
+glimpse(listings_sf)
+```
+
+## Geoprocessing with SF package
