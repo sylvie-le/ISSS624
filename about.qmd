@@ -2,8 +2,6 @@
 title: "About"
 ---
 
-About this site
+## About this site
 
-```{r}
-1 + 1
-```
+Hello, this is an introduction site. I will update content later, maybe stories of my learning journey?
