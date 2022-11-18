@@ -9,7 +9,7 @@ In this hands-on exercise, I learn how to import and wrangle geospatial data usi
 
 ## **Getting Started**
 
-The code chunk below installs and loads sf and tidyverse.
+The code chunk below installs and loads [sf](https://cran.r-project.org/web/packages/sf/index.html) and tidyverse.
 
 *Notes:* Make sure you imported the pacman package before running the code below.
 
