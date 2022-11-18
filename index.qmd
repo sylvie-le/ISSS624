@@ -2,6 +2,6 @@
 title: "ISSS624"
 ---
 
-Welcome to ISSS624 Geospatial Analytics Application!
+Welcome to ISSS624 Geospatial Analytics Applications!
 
-This is my journey of learning geospatial analytics.
+This is my journey of learning geospatial analytics. Follow me on this webpage for more!

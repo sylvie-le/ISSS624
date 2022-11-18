@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "ISSS624",
     "section": "",
-    "text": "This is my journey of learning geospatial analytics."
+    "text": "This is my journey of learning geospatial analytics. Follow me on this webpage for more!"
   },
   {
     "objectID": "about.html",
@@ -12,5 +12,12 @@
     "title": "About",
     "section": "",
     "text": "1 + 1\n\n[1] 2"
+  },
+  {
+    "objectID": "Hands-on_Ex01.html",
+    "href": "Hands-on_Ex01.html",
+    "title": "Hands-on Exercise 1",
+    "section": "",
+    "text": "Getting Started\nThis is the getting started paragraph."
   }
 ]
