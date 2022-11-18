@@ -11,13 +11,15 @@ In this hands-on exercise, I learn how to import and wrangle geospatial data usi
 
 The code chunk below installs and loads [sf](https://cran.r-project.org/web/packages/sf/index.html) and tidyverse.
 
-*Notes:* Make sure you imported the pacman package before running the code below.
+*Notes:* Make sure you imported the `pacman` package before running the code below.
 
 ```{r}
 pacman::p_load(sf, tidyverse)
 ```
 
 ## **Import Geospatial Data**
+
+Before importing anything, download the data zip file(s), unzip, and put them into the folder inside the directory of your page. Then create a Quarto document within that folder. The Quarto document and the data files need to be in the same folder, or you need to clarify the path to the data file while running the code below.
 
 ### Import polygon feature data
 
@@ -26,3 +28,97 @@ pacman::p_load(sf, tidyverse)
 ```{r}
 mpsz <- st_read(dsn = "data/geospatial", layer = "MP14_SUBZONE_WEB_PL")
 ```
+
+### Import polyline feature data
+
+Run the code chunk below.
+
+```{r}
+cyclingpath <- st_read(dsn = "data/geospatial", layer = "CyclingPath")
+```
+
+### Import GIS data in kml format
+
+Run the code chunk below.
+
+```{r}
+preschool <- st_read("data/geospatial/pre-schools-location-kml.kml")
+```
+
+## Checking Data Frame Content
+
+### Working with st_geometry()
+
+The type of geometry is multipolygon.
+
+```{r}
+st_geometry(mpsz)
+```
+
+### Working with glimpse()
+
+Glimpse display a sneak peek into the data type and values of the variables. Notice that `X_ADDR` and `Y_ADDR` are double type. There are other types like character, integer, and date.
+
+```{r}
+glimpse(mpsz)
+```
+
+### Working with head()
+
+Use `n = …` to select the number of records to display. Head gives a look at the first few rows of the data frame.
+
+```{r}
+head(mpsz, n = 5)
+```
+
+## Plotting The Geopspatial Data
+
+With geospatial data, we can use the plot() function to display them as visual elements. We can use `max.plot = …` to define the number of plots shown. This data set has 15 plots at the maximum but we only sketch 9 plots here, hence max.plot = 9.
+
+```{r}
+plot(mpsz, max.plot = 9)
+```
+
+We can choose to plot just one plot using the code chunk below. This is the plot of the sf object, which is the frame of all plots.
+
+```{r}
+plot(st_geometry(mpsz))
+```
+
+Or we can plot and view a specific attribute.
+
+```{r}
+plot(mpsz["PLN_AREA_N"])
+```
+
+*Notes: plot is only used for a quickly. For high cartographic quality plot, use tmap R package.*
+
+## Working with Projection
+
+When we want to project two or more geospatial data sets, it is important to ensure the data sets are projected under the same coordinate system. **Projection Transformation** is the method of projecting a data frame from one coordinate system to another.
+
+### Assign EPSG code to a data frame
+
+Issues to notice: missing coordination or wrongly assigned coordination due to the importing process.
+
+Using the code chunk below, we can see the coordinate system of `mpsz`.
+
+```{r}
+st_crs(mpsz)
+```
+
+Notice the `User input` says the data is projected in `svy21`, but the EPSG code is `9001`. This is a wrong EPSG code because the EPSG code for svy21 should be [3414](https://epsg.io/3414).
+
+We now assign the correct EPSG code using the code below.
+
+```{r}
+mpsz3414 <- st_set_crs(mpsz, 3414)
+```
+
+R warns us that `st_crs` does not reproject data. While this is true in case we want to do projection transformation, here we simply want to fix the EPSG code. Therefore, reprojection is not necessary and we can proceed with checking the EPSG of `mpsz3414`, which shows the correct EPSG code.
+
+```{r}
+st_crs(mpsz3414)
+```
+
+### Transform the projection of preschool from wgs84 to svy21
