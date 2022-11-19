@@ -272,7 +272,7 @@ top_n(mpsz3414, 1, `PreSch Density`)
 Firstly, we will plot a histogram to reveal the distribution of `PreSch Density`. Conventionally, *hist()* of R Graphics will be used as shown in the code chunk below.
 
 ```{r}
-hist(mpsz3414$`PreSch Density`)
+hist(mpsz3414$`PreSch Density`, main = "Histogram of School Density", xlab = "School Density")
 ```
 
 In the code chunk below, appropriate **ggplot2** functions will be used.
