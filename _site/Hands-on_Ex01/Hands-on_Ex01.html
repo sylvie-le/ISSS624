@@ -761,7 +761,7 @@ corrupt data frame: columns will be truncated or padded with NAs</code></pre>
 <h2 class="anchored" data-anchor-id="exploratory-data-analysis">Exploratory Data Analysis</h2>
 <p>Firstly, we will plot a histogram to reveal the distribution of <code>PreSch Density</code>. Conventionally, <em>hist()</em> of R Graphics will be used as shown in the code chunk below.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(mpsz3414<span class="sc">$</span><span class="st">`</span><span class="at">PreSch Density</span><span class="st">`</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(mpsz3414<span class="sc">$</span><span class="st">`</span><span class="at">PreSch Density</span><span class="st">`</span>, <span class="at">main =</span> <span class="st">"Histogram of School Density"</span>, <span class="at">xlab =</span> <span class="st">"School Density"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="Hands-on_Ex01_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid" width="672"></p>
 </div>
