@@ -420,7 +420,7 @@ qtm(mpsz_pop2020,
 
 **Notes**
 
-> -   *tmap_mode()* with \"plot\" option is used to produce a static map. For interactive mode, \"view\" option should be used.
+> -   *tmap_mode()* with "plot" option is used to produce a static map. For interactive mode, "view" option should be used.
 >
 > -   *fill* argument is used to map the attribute (i.e. DEPENDENCY)
 
@@ -501,7 +501,7 @@ The argument to customize borders are at below.
 >
 > -   *lwd* = border line width. The default is 1, and
 >
-> -   *lty* = border line type. The default is \"solid\".
+> -   *lty* = border line type. The default is "solid".
 
 ### Data classification methods of tmap
 

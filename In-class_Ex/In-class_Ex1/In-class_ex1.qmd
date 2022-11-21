@@ -1,11 +1,7 @@
 ---
-title: "In-class Exercise"
+title: "In-class Exercise 1"
 editor: visual
 ---
-
-## Overview
-
-This is the overview.
 
 ## Getting Started
 
@@ -15,6 +11,12 @@ The code chunk below will install and load tidyverse and sf package.
 pacman::p_load(sf, tidyverse)
 ```
 
+Then we load tmap.
+
+```{r}
+library(tmap)
+```
+
 ## Import Geospatial Data
 
 ### Importing polygon features
@@ -22,11 +24,54 @@ pacman::p_load(sf, tidyverse)
 This code chunk will import ESRI shapefile into R.
 
 ```{r}
-hunan_sf <- st_read(dsn = "dataC/geospatial", layer = "Hunan")
+hunan <- st_read(dsn = "dataC/geospatial", layer = "Hunan")
 ```
 
 ### Importing attribute data in csv
 
 ```{r}
-hunan <- read_csv("dataC/aspatial/Hunan_2012.csv", show_col_types = FALSE)
+hunan2012 <- read_csv("dataC/aspatial/Hunan_2012.csv", show_col_types = FALSE)
+```
+
+### Performing Relational Join
+
+```{r}
+hunan <- left_join(hunan,hunan2012)
+```
+
+## Visualising Regional Development Indicator
+
+Now, we are going to prepare a basemap and a choropleth map showing the distribution of GDPPC 2012 by using *qtm()* of **tmap** package.
+
+```{r}
+basemap <- tm_shape(hunan) +
+  tm_polygons() +
+  tm_text("NAME_3", size=0.3)+
+  tmap_options(check.and.fix = TRUE)
+
+gdppc <- qtm(hunan, "GDPPC")+
+  tm_layout(legend.text.size = 0.5)
+
+tmap_arrange(basemap, gdppc, asp=1, ncol=2)
+```
+
+## Computing Contiguity Spatial Weights
+
+### Computing (QUEEN) contiguity based neighbors
+
+First we install `spdep` package.
+
+```{r}
+pacman::p_load(spdep)
+```
+
+```{r}
+wm_q <- poly2nb(hunan, queen=TRUE)
+summary(wm_q)
+```
+
+To see the neighbors for the first polygon in the object.
+
+```{r}
+wm_q[[1]]
 ```
