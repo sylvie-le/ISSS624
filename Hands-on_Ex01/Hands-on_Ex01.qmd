@@ -158,7 +158,7 @@ listings <- read.csv("data/aspatial/listings.csv")
 To inspect the data set, instead of using `glimpse`, now we use `list` because of the object type.
 
 ```{r}
-options(max.print = 5)
+options(max.print = 10)
 list(listings)
 ```
 
@@ -537,60 +537,193 @@ Notice that the distribution of quantile data classification method are more eve
 
 Next, we will use all of the classification methods and compare the results.
 
+##### Map Comparison
+
 ```{r}
-par(mfrow = c(5,2))
-tm_shape(mpsz_pop2020)+
+m1 <- tm_shape(mpsz_pop2020)+
   tm_fill("DEPENDENCY",
           n = 5,
           style = "sd") +
   tm_borders(alpha = 0.5)+
   tm_layout(main.title = "SD")
-tm_shape(mpsz_pop2020)+
+m2 <- tm_shape(mpsz_pop2020)+
   tm_fill("DEPENDENCY",
           n = 5,
           style = "equal") +
   tm_borders(alpha = 0.5)+
   tm_layout(main.title = "Equal")
-tm_shape(mpsz_pop2020)+
+m3 <- tm_shape(mpsz_pop2020)+
   tm_fill("DEPENDENCY",
           n = 5,
           style = "pretty") +
   tm_borders(alpha = 0.5)+
   tm_layout(main.title = "Pretty")
-tm_shape(mpsz_pop2020)+
+m4 <- tm_shape(mpsz_pop2020)+
   tm_fill("DEPENDENCY",
           n = 5,
           style = "quantile") +
   tm_borders(alpha = 0.5)+
   tm_layout(main.title = "Quantile")
-tm_shape(mpsz_pop2020)+
+m5 <- tm_shape(mpsz_pop2020)+
   tm_fill("DEPENDENCY",
           n = 5,
           style = "kmeans") +
   tm_borders(alpha = 0.5)+
   tm_layout(main.title = "Kmeans")
-tm_shape(mpsz_pop2020)+
+m6 <- tm_shape(mpsz_pop2020)+
   tm_fill("DEPENDENCY",
           n = 5,
           style = "hclust") +
   tm_borders(alpha = 0.5)+
   tm_layout(main.title = "Hclust")
-tm_shape(mpsz_pop2020)+
+m7 <- tm_shape(mpsz_pop2020)+
   tm_fill("DEPENDENCY",
           n = 5,
           style = "bclust") +
   tm_borders(alpha = 0.5)+
   tm_layout(main.title = "Bclust")
-tm_shape(mpsz_pop2020)+
+m8 <- tm_shape(mpsz_pop2020)+
   tm_fill("DEPENDENCY",
           n = 5,
           style = "fisher") +
   tm_borders(alpha = 0.5)+
   tm_layout(main.title = "Fisher")
-tm_shape(mpsz_pop2020)+
+m9 <- tm_shape(mpsz_pop2020)+
   tm_fill("DEPENDENCY",
           n = 5,
           style = "jenks") +
   tm_borders(alpha = 0.5)+
   tm_layout(main.title = "Jenks")
+
+tmap_arrange(m1, m2, asp=1, ncol=2)
+tmap_arrange(m3, m4, asp=1, ncol=2)
+tmap_arrange(m5, m6, asp=1, ncol=2)
+tmap_arrange(m7, m8, asp=1, ncol=2)
+tmap_arrange(m9, asp=1, ncol=2)
 ```
+
+Each data classification methods provide a different representation of the data. Therefore, we should consider which classification method to best presenting the data, and which classification methods are meaningful to the data. Data presentation can be misleading if we don't choose carefully.
+
+#### Plotting choropleth map with custome break
+
+For all the built-in styles, the category breaks are computed internally. In order to override these defaults, the breakpoints can be set explicitly by means of the *breaks* argument to the *tm_fill()*. It is important to note that, in **tmap** the breaks include a minimum and maximum. As a result, in order to end up with n categories, n+1 elements must be specified in the *breaks* option (the values must be in increasing order).
+
+Before we get started, it is always a good practice to get some descriptive statistics on the variable before setting the break points. Code chunk below will be used to compute and display the descriptive statistics of **DEPENDENCY** field.
+
+```{r}
+summary(mpsz_pop2020$DEPENDENCY)
+```
+
+We set break point at 0.60, 0.70, 0.80, and 0.90 to reflect the quartiles, and include the min and max values as 0 and 100 respectively. Our *breaks* vector will be c(0, 0.60, 0.70, 0.80, 0.90, 100).
+
+```{r}
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          breaks = c(0, 0.60, 0.70, 0.80, 0.90, 100)) +
+  tm_borders(alpha = 0.5)
+```
+
+### Colour Scheme
+
+**tmap** supports colour ramps either defined by the user or a set of predefined colour ramps from the **RColorBrewer** package.
+
+#### Using ColourBrewer palette
+
+Using the `palette` argument of `tm_fill()`, we can define the color.
+
+```{r}
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          n = 6,
+          style = "quantile",
+          palette = "Blues") +
+  tm_borders(alpha = 0.5)
+```
+
+In this map, the color gets bolder when the value increases. To reverse the color map and make the higher values lighter, we use the prefix `-` before the color map's name.
+
+```{r}
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          style = "quantile",
+          palette = "-Greens") +
+  tm_borders(alpha = 0.5)
+```
+
+### Map Layouts
+
+Map layout refers to the combination of all map elements like title, legend, scale bar, etc. into a cohensive map.
+
+#### Map Legend
+
+We can customize the legend with multiple arguments using `tm_layouts()`. A histogram legend can be added using `legend.hist`. `legend.is.portrait` determines if the legends are in portrait or landscape mode. Refer to [R documentation](https://www.rdocumentation.org/packages/tmap/versions/3.3-3/topics/tm_fill) on tm_fill() for more details of legend settings.
+
+```{r}
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY", 
+          style = "jenks", 
+          palette = "Blues", 
+          legend.hist = TRUE, 
+          legend.is.portrait = TRUE,
+          legend.hist.z = 0.1) +
+  tm_layout(main.title = "Distribution of Dependency Ratio by planning subzone \n(Jenks classification)",
+            main.title.position = "center",
+            main.title.size = 1,
+            legend.height = 0.45, 
+            legend.width = 0.35,
+            legend.outside = FALSE,
+            legend.position = c("right", "bottom"),
+            frame = FALSE) +
+  tm_borders(alpha = 0.5)
+```
+
+#### Map style
+
+tmap_style() is used to set many styles for the map. See [Details of tm_layout()](https://www.rdocumentation.org/packages/tmap/versions/3.3-3/topics/tm_layout) for predefined styles.
+
+```{r}
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY", 
+          style = "quantile", 
+          palette = "-Greens") +
+  tm_borders(alpha = 0.5) +
+  tmap_style("classic")
+```
+
+#### Cartographic Furniture
+
+Beside map style, **tmap** also also provides arguments to draw other map furniture such as compass, scale bar and grid lines. Refer to [tm_layout()'s documentation](https://www.rdocumentation.org/packages/tmap/versions/3.3-3/topics/tm_layout) for more details on the argument to customize the map.
+
+```{r}
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY", 
+          style = "quantile", 
+          palette = "Blues",
+          title = "No. of persons") +
+  tm_layout(main.title = "Distribution of Dependency Ratio \nby planning subzone",
+            main.title.position = "center",
+            main.title.size = 1.2,
+            legend.height = 0.45, 
+            legend.width = 0.35,
+            frame = TRUE) +
+  tm_borders(alpha = 0.5) +
+  tm_compass(type="8star", size = 2) +
+  tm_scale_bar(width = 0.15) +
+  tm_grid(lwd = 0.1, alpha = 0.2) +
+  tm_credits("Source: Planning Sub-zone boundary from Urban Redevelopment Authorithy (URA)\n and Population data from Department of Statistics DOS", 
+             position = c("left", "bottom"))
+```
+
+### Drawing Small Multiple Choropleth Maps
+
+**Small multiple maps**, also referred to as **facet maps**, are composed of many maps arrange side-by-side, and sometimes stacked vertically.
+
+In **tmap**, small multiple maps can be plotted in three ways:
+
+-   by assigning multiple values to at least one of the asthetic arguments,
+
+-   by defining a group-by variable in *tm_facets()*, and
+
+-   by creating multiple stand-alone maps with *tmap_arrange()*.
+
+#### By assigning multiple values to at least one of the aesthetic arguments
