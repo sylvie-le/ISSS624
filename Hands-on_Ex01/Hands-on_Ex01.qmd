@@ -417,3 +417,180 @@ tmap_mode(mode = "plot")
 qtm(mpsz_pop2020, 
     fill = "DEPENDENCY")
 ```
+
+**Notes**
+
+> -   *tmap_mode()* with \"plot\" option is used to produce a static map. For interactive mode, \"view\" option should be used.
+>
+> -   *fill* argument is used to map the attribute (i.e. DEPENDENCY)
+
+### Method 2: Creating a choropleth map by using tmap's elements
+
+While being convenient and short, `qtm()` does not allow for drawing maps with high cartographic quality. To overcome `qtm()`'s disadvantage, we can use `tmap`'s elements.
+
+```{r}
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY", 
+          style = "quantile", 
+          palette = "Blues",
+          title = "Dependency ratio") +
+  tm_layout(main.title = "Distribution of Dependency Ratio by planning subzone",
+            main.title.position = "center",
+            main.title.size = 1.2,
+            legend.height = 0.45, 
+            legend.width = 0.35,
+            frame = TRUE) +
+  tm_borders(alpha = 0.5) +
+  tm_compass(type="8star", size = 2) +
+  tm_scale_bar() +
+  tm_grid(alpha =0.2) +
+  tm_credits("Source: Planning Sub-zone boundary from Urban Redevelopment Authorithy (URA)\n and Population data from Department of Statistics DOS", 
+             position = c("left", "bottom"))
+```
+
+Next, let's look at the code and draw the map step by step to understand how each element works.
+
+#### Drawing a base map
+
+The building block of tmap is `tm_shape()`, which is followed by elements such as `tm_fill()` and `tm_polygons()`. We will use `tm_polygons()` as it allows us to fill the polygons with color as `tm_fill()` does, and also let us draw the border of the polygons as `tm_border()`.
+
+```{r}
+tm_shape(mpsz_pop2020) +
+  tm_polygons()
+```
+
+#### Drawing a choropleth map using tm_polygons()
+
+Next, we will define how the colors are filled into the map by letting `tm_polygons()` know the criteria to fill. In this case, the criteria is the variable DEPENDENCY.
+
+```{r}
+tm_shape(mpsz_pop2020)+
+  tm_polygons("DEPENDENCY")
+```
+
+**Notes**
+
+> -   The default binning to draw the choropleth map is called "pretty". Refer to sub-section 4.3 for more details.
+>
+> -   The default color scheme is `YlOrRd`. Refer to sub-section 4.4 for more details of color schemes.
+>
+> -   By default, Missing value is filled with gray.
+
+#### Drawing a choropleth map using *tm_fill()* and tm_border()
+
+Instead of using tm_polygons(), we can use tm_fill() and tm_border() instead. The code will be longer but if some day we like to type more, we can opt for this option.
+
+```{r}
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY")
+```
+
+With just `tm_fill()`, the map is drawn without the borders between the areas. To add the borders, we combine the code chunk above with `tm_borders()`.
+
+```{r}
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY") +
+  tm_borders(lwd = 0.1,  alpha = 1)
+```
+
+Observing the map, we see that the border thickness are different that what we achieved with `tm_polygons()`. This suggests that we can customize border thickness with `tm_borders()`.
+
+The argument to customize borders are at below.
+
+> -   *col* = border colour,
+>
+> -   *lwd* = border line width. The default is 1, and
+>
+> -   *lty* = border line type. The default is \"solid\".
+
+### Data classification methods of tmap
+
+Data classification is to group a large numbers of observations into ranges or classes. It helps us to better describe the data and present the information we want to highlight, besides other roles.
+
+**tmap** provides a total ten data classification methods, namely: *fixed*, *sd*, *equal*, *pretty* (default), *quantile*, *kmeans*, *hclust*, *bclust*, *fisher*, and *jenks*. Refer to [R documentations](https://search.r-project.org/CRAN/refmans/classInt/html/classIntervals.html) details on the methods.
+
+To define a data classification method, the *style* argument of *tm_fill()* or *tm_polygons()* will be used.
+
+#### Plotting choropleth maps with built-in classification methods
+
+Use n = 5 as in the code chunk below to classify the data into 5 classes.
+
+```{r}
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          n = 5,
+          style = "jenks") +
+  tm_borders(alpha = 0.5)
+```
+
+The code below classifies the data using equal classification method.
+
+```{r}
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          n = 5,
+          style = "equal") +
+  tm_borders(alpha = 0.5)
+```
+
+Notice that the distribution of quantile data classification method are more evenly distributed then equal data classification method.
+
+Next, we will use all of the classification methods and compare the results.
+
+```{r}
+par(mfrow = c(5,2))
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          n = 5,
+          style = "sd") +
+  tm_borders(alpha = 0.5)+
+  tm_layout(main.title = "SD")
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          n = 5,
+          style = "equal") +
+  tm_borders(alpha = 0.5)+
+  tm_layout(main.title = "Equal")
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          n = 5,
+          style = "pretty") +
+  tm_borders(alpha = 0.5)+
+  tm_layout(main.title = "Pretty")
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          n = 5,
+          style = "quantile") +
+  tm_borders(alpha = 0.5)+
+  tm_layout(main.title = "Quantile")
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          n = 5,
+          style = "kmeans") +
+  tm_borders(alpha = 0.5)+
+  tm_layout(main.title = "Kmeans")
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          n = 5,
+          style = "hclust") +
+  tm_borders(alpha = 0.5)+
+  tm_layout(main.title = "Hclust")
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          n = 5,
+          style = "bclust") +
+  tm_borders(alpha = 0.5)+
+  tm_layout(main.title = "Bclust")
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          n = 5,
+          style = "fisher") +
+  tm_borders(alpha = 0.5)+
+  tm_layout(main.title = "Fisher")
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          n = 5,
+          style = "jenks") +
+  tm_borders(alpha = 0.5)+
+  tm_layout(main.title = "Jenks")
+```
