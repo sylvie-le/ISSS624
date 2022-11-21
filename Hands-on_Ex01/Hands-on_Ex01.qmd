@@ -1,7 +1,9 @@
 ---
-title: "Hands-on Exercise 1: Geospatial Wrangling with R"
+title: "Hands-on Exercise 1: Geospatial Wrangling and Choropleth Mapping with R"
 editor: visual
 ---
+
+# Geospatial Wrangling
 
 ## **Overview**
 
@@ -297,4 +299,121 @@ ggplot(data = mpsz3414,
   geom_point() +
   labs(x = "Pre-school Density (per km square)",
        y = "Pre-school Count")
+```
+
+# Choropleth Mapping
+
+## Overview
+
+Choropleth map is a map showing different colors depending on the value of the attribute that the map is presenting. For example, a map showing population density have different colors for each areas with varying levels of population density.
+
+## Getting Started
+
+This exercise will use the [tmap](https://cran.r-project.org/web/packages/tmap/) R package and four other R packages.
+
+-   [**readr**](https://readr.tidyverse.org/) for importing delimited text file,
+
+-   [**tidyr**](https://tidyr.tidyverse.org/) for tidying data,
+
+-   [**dplyr**](https://dplyr.tidyverse.org/) for wrangling data and
+
+-   [**sf**](https://cran.r-project.org/web/packages/sf/) for handling geospatial data.
+
+First, we load the packages into R Studio.
+
+```{r}
+pacman::p_load(sf, tmap, tidyverse)
+```
+
+## Importing Data into R
+
+### Importing Geospatial Data into R
+
+Since we already imported and inspected the `MP4_SUBZONE_WEB_PL` shapefile as `mpsz`, we can skip this step.
+
+### Importing Attribute Data into R
+
+```{r}
+popdata <- read_csv('~/sylvie-le/ISSS624/Hands-on_Ex01/data/aspatial/respopagesextod2011to2020.csv')
+```
+
+### Data Preparation
+
+### We need to prepare a data table with the necessary data points as below.
+
+-   YOUNG: age group 0 to 4 until age groyup 20 to 24,
+
+-   ECONOMY ACTIVE: age group 25-29 until age group 60-64,
+
+-   AGED: age group 65 and above,
+
+-   TOTAL: all age group, and
+
+-   DEPENDENCY: the ratio between young and aged against economy active group
+
+#### Data Wrangling
+
+The functions below is used to wrangle the data as defined above.
+
+```{r}
+popdata2020 <- popdata %>%
+  filter(Time == 2020) %>%
+  group_by(PA, SZ, AG) %>%
+  summarise(`POP` = sum(`Pop`)) %>%
+  ungroup()%>%
+  pivot_wider(names_from=AG, 
+              values_from=POP) %>%
+  mutate(YOUNG = rowSums(.[3:6])
+         +rowSums(.[12])) %>%
+mutate(`ECONOMY ACTIVE` = rowSums(.[7:11])+
+rowSums(.[13:15]))%>%
+mutate(`AGED`=rowSums(.[16:21])) %>%
+mutate(`TOTAL`=rowSums(.[3:21])) %>%  
+mutate(`DEPENDENCY` = (`YOUNG` + `AGED`)
+/`ECONOMY ACTIVE`) %>%
+  select(`PA`, `SZ`, `YOUNG`, 
+       `ECONOMY ACTIVE`, `AGED`, 
+       `TOTAL`, `DEPENDENCY`)
+```
+
+#### Joining the attribute data and geospatial data
+
+Before we can perform the georelational join, one extra step is required to convert the values in PA and SZ fields to uppercase. This is because the values of PA and SZ fields are made up of upper- and lowercase. On the other, hand the SUBZONE_N and PLN_AREA_N are in uppercase.
+
+Since `funs()` was deprecated, we use `list()` instead.
+
+```{r}
+popdata2020 <- popdata2020 %>%
+  mutate_at(.vars = vars(PA, SZ), 
+          .funs = list(toupper)) %>%
+  filter(`ECONOMY ACTIVE` > 0)
+```
+
+After that, we conduct a left join of the data using `left_join()` , to ensure the output to be simple features data frame.
+
+```{r}
+mpsz_pop2020 <- left_join(mpsz, popdata2020,
+                          by = c("SUBZONE_N" = "SZ"))
+```
+
+Now we save the new file after creating a new folder called rds in data folder.
+
+```{r}
+write_rds(mpsz_pop2020, "~/sylvie-le/ISSS624/Hands-on_Ex01/data/rds/mpszpop2020.rds")
+```
+
+## Choropleth Mapping Geospatial Data Using tmap
+
+Two approaches can be used to prepare thematic map using *tmap*, they are:
+
+-   Plotting a thematic map quickly by using *qtm()*.
+
+-   Plotting highly customisable thematic map by using tmap elements.
+
+### Method 1: Plotting using qtm()
+
+```{r}
+tmap_mode(mode = "plot")
+qtm(mpsz_pop2020, 
+    fill = "DEPENDENCY")
 ```
