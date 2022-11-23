@@ -9,6 +9,8 @@ website:
         menu: 
           - text: Data Wrangling and Choropleth Map (1)
             href: Hands-on_Ex/Hands-on_Ex01.qmd
+          - text: Global and Local Measures of Spatial Autocorrelation (2)
+            href: Hands-on_Ex/Hands-on_Ex02.qmd
       - text: In-class Exercises
         menu: 
           - text: Spatial Weights and Applications (1)
