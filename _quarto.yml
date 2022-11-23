@@ -8,7 +8,7 @@ website:
       - text: Hands-on Exercises
         menu: 
           - text: Data Wrangling and Choropleth Map (1)
-            href: Hands-on_Ex01/Hands-on_Ex01.qmd
+            href: Hands-on_Ex/Hands-on_Ex01.qmd
       - text: In-class Exercises
         menu: 
           - text: Spatial Weights and Applications (1)
