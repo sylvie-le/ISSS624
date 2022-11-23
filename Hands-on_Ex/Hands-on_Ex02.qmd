@@ -1,5 +1,5 @@
 ---
-title: "Hands-on_Ex02: Global and Local Measures of Spatial Autocorrelation"
+title: "Global and Local Measures of Spatial Autocorrelation"
 editor: visual
 ---
 
