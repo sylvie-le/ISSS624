@@ -84,3 +84,88 @@ tmap_arrange(equal, quantile, asp = 1, ncol = 2)
 ```
 
 ## Global Spatial Autocorrelation
+
+### Computing contiguity spatial weight
+
+Before we can compute the global spatial autocorrelation statistics, we need to construct a spatial weights of the study area. The spatial weights is used to define the neighbourhood relationships between the geographical units (i.e. county) in the study area.
+
+```{r}
+wm_q <- poly2nb(hunan, queen = TRUE)
+summary(wm_q)
+```
+
+### Row-standardized weights matrix
+
+```{r}
+rswm_q <- nb2listw(wm_q, style = "W", zero.policy = TRUE)
+rswm_q
+```
+
+Refer [HERE](https://r4gdsa.netlify.app/chap04.html#row-standardised-weights-matrix) for an explanation of the code and [HERE](https://www.rdocumentation.org/packages/spdep/versions/1.2-7/topics/nb2listw) for documentation on `nb2listw()`.
+
+### Global Spatial Autocorrelation: Moran's I
+
+#### Moran's Test
+
+We will perform Moran test using `moran.test()` from `spdep`.
+
+```{r}
+moran.test(hunan$GDPPC,
+           listw = rswm_q,
+           zero.policy = TRUE,
+           na.action = na.omit)
+```
+
+Moran I statistic is approximately 0.3, indicating clustered data. The neighbor observations tend to be similar.
+
+#### Computing Monte Carlo Moran's I
+
+We will conduct a permutation test for Moran's I statistic by generating 1,000 simulations.
+
+```{r}
+set.seed(1234) #to prevent the result from changing due to random calculation
+bperm = moran.mc(hunan$GDPPC,
+                 listw = rswm_q,
+                 nsim = 999,
+                 zero.policy = TRUE,
+                 na.action = na.omit)
+bperm
+```
+
+The result of 1,000 simulation is similar to the Moran's I test.
+
+#### Visulize Monte Carlo Moran's I
+
+```{r}
+mean(bperm$res[1:999])
+```
+
+```{r}
+var(bperm$res[1:999])
+```
+
+```{r}
+summary(bperm$res[1:999])
+```
+
+```{r}
+hist(bperm$res,
+     freq = TRUE,
+     breaks = 20,
+     xlab = "Simulated Moran's I")
+abline(v = 0, col = "red")
+```
+
+The distribution of the simulation result are skewed to the right. Most results are less than 0.
+
+We can use ggplot2 to visualize Monte Carlo Moran's I.
+
+```{r}
+library(ggplot2)
+df <- data.frame(bperm$res)
+ggplot(df, aes(bperm$res)) +
+  geom_histogram(fill = "gray", color = "black") +
+  scale_x_continuous() +
+  geom_vline(aes(xintercept = 0), color = "red") +
+  labs(title = "Histogram of bperm$res", x = "Simulated Moran's I", y = "Frequency")
+```
