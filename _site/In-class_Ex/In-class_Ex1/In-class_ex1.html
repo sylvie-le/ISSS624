@@ -146,8 +146,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-hands-on-exercises" role="button" data-bs-toggle="dropdown" aria-expanded="false">Hands-on Exercises</a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-hands-on-exercises">    
         <li>
-    <a class="dropdown-item" href="../../Hands-on_Ex01/Hands-on_Ex01.html">
- <span class="dropdown-text">Data Wrangling and Choropleth Map</span></a>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex01.html">
+ <span class="dropdown-text">Data Wrangling and Choropleth Map (1)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex02.html">
+ <span class="dropdown-text">Global and Local Measures of Spatial Autocorrelation (2)</span></a>
   </li>  
     </ul>
   </li>
@@ -156,7 +160,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <ul class="dropdown-menu" aria-labelledby="nav-menu-in-class-exercises">    
         <li>
     <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex1/In-class_ex1.html">
- <span class="dropdown-text">Spatial Weights and Applications</span></a>
+ <span class="dropdown-text">Spatial Weights and Applications (1)</span></a>
   </li>  
     </ul>
   </li>
@@ -1221,7 +1225,7 @@ Non-symmetric neighbours list</code></pre>
 <h3 class="anchored" data-anchor-id="row-standardized-weights-matrix">Row-standardized weights matrix</h3>
 <p>Drawback of weight matrix method:</p>
 <blockquote class="blockquote">
-<p>The polygons along the edges of the study area will base their lagged values on fewer polygons thus potentially over- or under-estimating the true nature of the spatial autocorrelation in the data. For this example, we'll stick with the style="W" option for simplicity's sake but note that other more robust options are available, notably style="B".</p>
+<p>The polygons along the edges of the study area will base their lagged values on fewer polygons thus potentially over- or under-estimating the true nature of the spatial autocorrelation in the data. For this example, we’ll stick with the style=“W” option for simplicity’s sake but note that other more robust options are available, notably style=“B”.</p>
 </blockquote>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>rswm_q <span class="ot">&lt;-</span> <span class="fu">nb2listw</span>(wm_q, <span class="at">style=</span><span class="st">"W"</span>, <span class="at">zero.policy =</span> <span class="cn">TRUE</span>)</span>
@@ -1294,7 +1298,7 @@ B 88 7744 8.786867 0.3776535 3.8137</code></pre>
 <h2 class="anchored" data-anchor-id="application-of-spatial-weight-matrix">Application of Spatial Weight Matrix</h2>
 <section id="spatial-lag-with-row-standardized-weights" class="level3">
 <h3 class="anchored" data-anchor-id="spatial-lag-with-row-standardized-weights">Spatial lag with row-standardized weights</h3>
-<p>We'll compute the average neighbor GDPPC value for each polygon. These values are often referred to as <strong>spatially lagged values.</strong></p>
+<p>We’ll compute the average neighbor GDPPC value for each polygon. These values are often referred to as <strong>spatially lagged values.</strong></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>GDPPC.lag <span class="ot">&lt;-</span> <span class="fu">lag.listw</span>(rswm_q, hunan<span class="sc">$</span>GDPPC)</span>
 <span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>GDPPC.lag</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

@@ -1,4 +1,28 @@
 ---
-title: "Hands-on_Ex02.qmd"
+title: "Hands-on_Ex02: Global and Local Measures of Spatial Autocorrelation"
 editor: visual
 ---
+
+## Overview
+
+This exercise provide the steps of computing the Global and Local Measures of Spatial Autocorrelation using `spdep` package.
+
+## Getting Started
+
+### The analytical question
+
+We may ask, is a character or attribute evenly distributed across areas or regions? If they are not, then is there a sign of spatial clustering, and if yes, where are the clusters? Those questions can be applied to a wide range of domains: development planning of city councils, shop outlet location setting of a fashion chain, examining the habitat clusters of a certain plant species, etc.
+
+In this case study, we are interested to examine the spatial pattern of a selected development indicator (i.e. GDP per capita) of [Hunan Provice, People Republic of China](https://en.wikipedia.org/wiki/Hunan).
+
+### The study area and data
+
+Two data sets will be used in this hands-on exercise, they are:
+
+-   Hunan province administrative boundary layer at county level. This is a geospatial data set in ESRI shapefile format.
+
+-   Hunan_2012.csv: This csv file contains selected Hunan\'s local development indicators in 2012.
+
+We will reuse the data that we exercised in the [In-class Exercise 2 - Spatial Weights and Application](https://isss624-1stcommit.netlify.app/in-class_ex/in-class_ex1/in-class_ex1) segment of this website.
+
+### Setting the analytical tools

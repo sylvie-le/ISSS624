@@ -334,7 +334,7 @@ Since we already imported and inspected the `MP4_SUBZONE_WEB_PL` shapefile as `m
 ### Importing Attribute Data into R
 
 ```{r}
-popdata <- read_csv('~/sylvie-le/ISSS624/Hands-on_Ex01/data/aspatial/respopagesextod2011to2020.csv')
+popdata <- read_csv('~/sylvie-le/ISSS624/Hands-on_Ex/data/aspatial/respopagesextod2011to2020.csv')
 ```
 
 ### Data Preparation
@@ -399,7 +399,7 @@ mpsz_pop2020 <- left_join(mpsz, popdata2020,
 Now we save the new file after creating a new folder called rds in data folder.
 
 ```{r}
-write_rds(mpsz_pop2020, "~/sylvie-le/ISSS624/Hands-on_Ex01/data/rds/mpszpop2020.rds")
+write_rds(mpsz_pop2020, "~/sylvie-le/ISSS624/Hands-on_Ex/data/rds/mpszpop2020.rds")
 ```
 
 ## Choropleth Mapping Geospatial Data Using tmap
