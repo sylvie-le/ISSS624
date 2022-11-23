@@ -7,11 +7,11 @@ website:
     left: 
       - text: Hands-on Exercises
         menu: 
-          - text: Data Wrangling and Choropleth Map
+          - text: Data Wrangling and Choropleth Map (1)
             href: Hands-on_Ex01/Hands-on_Ex01.qmd
       - text: In-class Exercises
         menu: 
-          - text: Spatial Weights and Applications
+          - text: Spatial Weights and Applications (1)
             href: In-class_Ex/In-class_Ex1/In-class_ex1.qmd
     right:
       - href: index.qmd
