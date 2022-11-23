@@ -26,3 +26,61 @@ Two data sets will be used in this hands-on exercise, they are:
 We will reuse the data that we exercised in the [In-class Exercise 2 - Spatial Weights and Application](https://isss624-1stcommit.netlify.app/in-class_ex/in-class_ex1/in-class_ex1) segment of this website.
 
 ### Setting the analytical tools
+
+First, we load the necessary R packages.
+
+```{r}
+pacman::p_load(sf, spdep, tmap, tidyverse)
+```
+
+## Getting the Data into the R Environment
+
+### Import shapefile into R environment
+
+We import the Hunan shapefile into R using the `sf` package.
+
+```{r}
+hunan <- st_read(dsn = "~/sylvie-le/ISSS624/In-class_Ex/In-class_Ex1/dataC/geospatial", layer = "Hunan")
+```
+
+### Import CSV file into R environment
+
+```{r}
+hunan2012 <- read_csv("~/sylvie-le/ISSS624/In-class_Ex/In-class_Ex1/dataC/aspatial/Hunan_2012.csv", show_col_types = FALSE)
+```
+
+### Perform relational join
+
+```{r}
+hunan <- left_join(hunan, hunan2012)
+```
+
+### Visualize regional development indicator
+
+Now we will prepare a choropleth map showing the distribution of GDPPC 2012 in Hunan.
+
+```{r}
+equal <- tm_shape(hunan) +
+  tm_fill("GDPPC",
+          n = 5,
+          style = "equal") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "Equal interval classification",
+            main.title.size = 1,
+            main.title.position = "center",
+            legend.text.size = 0.45)
+
+quantile <- tm_shape(hunan) +
+  tm_fill("GDPPC",
+          n = 5,
+          style = "quantile") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "Equal quantile classification",
+            main.title.size = 1,
+            main.title.position = "center",
+            legend.text.size = 0.45)
+
+tmap_arrange(equal, quantile, asp = 1, ncol = 2)
+```
+
+## Global Spatial Autocorrelation
