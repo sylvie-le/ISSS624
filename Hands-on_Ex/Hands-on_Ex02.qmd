@@ -581,7 +581,7 @@ Gimap <-tm_shape(hunan.gi) +
 tmap_arrange(gdppc, Gimap, asp=1, ncol=2)
 ```
 
-The fixed distance weight method reveals the hot spots, which are areas with higher GDPPC values among their neighbors, and cold spots, which have lower GDPPC value among their neighbors. However, due to the varying size of the counties, we see some discrepancy between the Gi map (right) and the original map (left). For example, there is a county in Chenzhou that has high GDPPC (above 80,000) but is depicted as a cold area in the Gi map.
+The fixed distance weight method reveals the hot spots, which are areas with higher GDPPC values among their neighbors, and cold spots, which have lower GDPPC value among their neighbors. However, due to the varying size of the counties, the fixed distance method shows scattering clusters which is not very useful for development decision.
 
 ### Gi statistics using adaptive distance
 
@@ -611,3 +611,5 @@ tmap_arrange(gdppc,
              asp=1, 
              ncol=2)
 ```
+
+The adaptive distance weight method shows clear border clusters. For the map on the right, we can see the hot spot areas with higher GDPPC than their neighbors being closer or overlap with high GDPPC counties. From this map, we can also see the ripple effect on GDPPC caused by the higher developed counties to the nearby provinces on the eastern side of Hunan. This map also shows the cold spot areas located on the far west side of Hunan with GDPPC being lower than their neighbors. They are the counties that are lagged behind in terms of GDPPC and may need the attention to development investment.
