@@ -581,6 +581,8 @@ Gimap <-tm_shape(hunan.gi) +
 tmap_arrange(gdppc, Gimap, asp=1, ncol=2)
 ```
 
+The fixed distance weight method reveals the hot spots, which are areas with higher GDPPC values among their neighbors, and cold spots, which have lower GDPPC value among their neighbors. However, due to the varying size of the counties, we see some discrepancy between the Gi map (right) and the original map (left). For example, there is a county in Chenzhou that has high GDPPC (above 80,000) but is depicted as a cold area in the Gi map.
+
 ### Gi statistics using adaptive distance
 
 ```{r}
