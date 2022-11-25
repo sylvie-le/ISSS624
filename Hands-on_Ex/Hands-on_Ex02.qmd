@@ -116,7 +116,7 @@ moran.test(hunan$GDPPC,
            na.action = na.omit)
 ```
 
-Moran I statistic is approximately 0.3, indicating clustered data. The neighbor observations tend to be similar.
+Moran I statistic is approximately 0.3, indicating clustered data. The neighbor observations tend to be similar. p-valu is less than 0.05. Therefore, we reject the null hypothesis H0 of spatial randomness at 95% confidence level.
 
 #### Computing Monte Carlo Moran's I
 
@@ -132,7 +132,7 @@ bperm = moran.mc(hunan$GDPPC,
 bperm
 ```
 
-The result of 1,000 simulation is similar to the Moran's I test.
+The result of 1,000 simulation is similar to the Moran's I test. p-value is less than 0.05. Therefore, we are confident at 95% level of confidence that the data does not violate Moran's I assumption of spatial randomness.
 
 #### Visulize Monte Carlo Moran's I
 
@@ -154,11 +154,14 @@ hist(bperm$res,
      breaks = 20,
      xlab = "Simulated Moran's I")
 abline(v = 0, col = "red")
+pacman::p_load(survival, fitdistrplus)
+fit <- fitdist(bperm$res, "norm")
+plot(fit)
 ```
 
-The distribution of the simulation result are skewed to the right. Most results are less than 0.
+The distribution of the simulation result fits a normal distribution. We can conclude that the data does not violate Moran's I assumption of normality.
 
-We can use ggplot2 to visualize Monte Carlo Moran's I.
+We can use ggplot2 to visualize Monte Carlo Moran's I. The plot is slightly different because ggplot2 binning algorithm is different from hist binning algorithm.
 
 ```{r}
 library(ggplot2)
@@ -180,7 +183,7 @@ ggplot(df, aes(bperm$res)) +
 geary.test(hunan$GDPPC, listw = rswm_q)
 ```
 
-c-value = 0.69 \< 1. Therefore, the data is clustered and neighbor observations tend to be similar.
+c-value = 0.69 \< 1. Therefore, the data is clustered and neighbor observations tend to be similar. p-value is less than 0.05 and z-score is positive. Therefore, the spatial distribution of high values in the dataset is more spatially clustered than would be expected if underlying spatial processes were truly random.
 
 #### Compute Monte Carlo Geary's C
 
@@ -194,7 +197,7 @@ bperm = geary.mc(hunan$GDPPC,
 bperm
 ```
 
-The result of the simulation is also 0.69, corroborating the result of Geary's C test.
+The result of the simulation is also 0.69 with p-value less than 0.05, corroborating the result of Geary's C test. We can say with 95% confidence that the data does not violate Geary's C assumption of spatial randomness.
 
 #### Visualizing Monte Carlo Geary's C
 
@@ -213,9 +216,11 @@ summary(bperm$res)
 ```{r}
 hist(bperm$res, freq = TRUE, breaks = 20, xlab = "Simulated Geary's C")
 abline(v = 1, col = "red")
+fitg <- fitdist(bperm$res, "norm")
+plot(fitg)
 ```
 
-The distribution of the simulation is almost symmetrical around the x = 1 intercept.
+The distribution of the simulation result fits a normal distribution. We can conclude that the data does not violate Geary's C assumption of normality.
 
 ## Spatial Correlogram
 
@@ -255,7 +260,7 @@ print(CG_corr)
 
 ### Compute local Moran's I
 
-The code chunks below are used to compute local Moran\'s I of *GDPPC2012* at the county level.
+The code chunks below are used to compute local Moran's I of *GDPPC2012* at the county level.
 
 ```{r}
 fips <- order(hunan$County)
@@ -288,7 +293,7 @@ tm_shape(hunan.localMI) +
   tm_layout(legend.text.size = 0.5)
 ```
 
-#### Mapping local Moran\'s I p-values
+#### Mapping local Moran's I p-values
 
 ```{r}
 tm_shape(hunan.localMI) +
@@ -302,7 +307,7 @@ tm_shape(hunan.localMI) +
 
 #### Map both local Moran's I value and p's value
 
-For effective interpretation, it is better to plot both the local Moran\'s I values map and its corresponding p-values map next to each other.
+For effective interpretation, it is better to plot both the local Moran's I values map and its corresponding p-values map next to each other.
 
 ```{r}
 localMI.map <- tm_shape(hunan.localMI) +
@@ -428,7 +433,7 @@ tm_shape(hunan.localMI) +
   tm_layout(legend.text.size = 0.5)
 ```
 
-For effective interpretation, it is better to plot both the local Moran\'s I values map and its corresponding p-values map next to each other.
+For effective interpretation, it is better to plot both the local Moran's I values map and its corresponding p-values map next to each other.
 
 ```{r}
 gdppc <- qtm(hunan, "GDPPC") +
@@ -455,11 +460,11 @@ tmap_arrange(gdppc, LISAmap, asp=1, ncol=2)
 
 Beside detecting cluster and outliers, localised spatial statistics can be also used to detect hot spot and/or cold spot areas.
 
-The term \'hot spot\' has been used generically across disciplines to describe a region or value that is higher relative to its surroundings (Lepers et al 2005, Aben et al 2012, Isobe et al 2015).
+The term 'hot spot' has been used generically across disciplines to describe a region or value that is higher relative to its surroundings (Lepers et al 2005, Aben et al 2012, Isobe et al 2015).
 
-### Getis and Ord\'s G-Statistics
+### Getis and Ord's G-Statistics
 
-An alternative spatial statistics to detect spatial anomalies is the Getis and Ord\'s G-statistics (Getis and Ord, 1972; Ord and Getis, 1995). It looks at neighbours within a defined proximity to identify where either high or low values clutser spatially. Here, statistically significant hot-spots are recognised as areas of high values where other areas within a neighbourhood range also share high values too.
+An alternative spatial statistics to detect spatial anomalies is the Getis and Ord's G-statistics (Getis and Ord, 1972; Ord and Getis, 1995). It looks at neighbours within a defined proximity to identify where either high or low values clutser spatially. Here, statistically significant hot-spots are recognised as areas of high values where other areas within a neighbourhood range also share high values too.
 
 The analysis consists of three steps:
 
@@ -540,7 +545,7 @@ gi.fixed <- localG(hunan$GDPPC, wm62_lw)
 gi.fixed
 ```
 
-The output of localG() is a vector of G or Gstar values, with attributes \"gstari\" set to TRUE or FALSE, \"call\" set to the function call, and class \"localG\".
+The output of localG() is a vector of G or Gstar values, with attributes "gstari" set to TRUE or FALSE, "call" set to the function call, and class "localG".
 
 The Gi statistics is represented as a Z-score. Greater values represent a greater intensity of clustering and the direction (positive or negative) indicates high or low clusters.
 
