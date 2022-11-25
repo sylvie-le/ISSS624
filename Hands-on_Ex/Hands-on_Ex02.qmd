@@ -456,6 +456,14 @@ LISAmap <- tm_shape(hunan.localMI) +
 tmap_arrange(gdppc, LISAmap, asp=1, ncol=2)
 ```
 
+The red counties signify positive autocorrelation with high-value clusters surrounded by high-value neighbors. Those areas have high values of GDPPC in correlation with nearby counties that also have high GDPPC.
+
+The darkblue counties signify positive autocorrelation with low-value clusters surrounded by low-value neighbors. They are the counties with relatively lower value of GDPPC in correlation with nearby counties with low GDPPC. For development planning, they need more investment because while being close to developed areas with generally higher GDPPC, it looks like they are not yet benefiting from the development of the region.
+
+The light orange county shows that it is an outlier that has higher value than nearby lower neighbors. Spatial-wise, this county is more developed than its nearby counties and is getting the synergy of nearby counties with higher GDPPC.
+
+The light blue counties are outlier with lower GDPPC than their neighbor counties. Being the remote counties far away from the more developed areas, they are the least developed counties that are lagged behind, requiring attention for development investment.
+
 ## Hot Spot and Cold Spot Area Analysis
 
 Beside detecting cluster and outliers, localised spatial statistics can be also used to detect hot spot and/or cold spot areas.
