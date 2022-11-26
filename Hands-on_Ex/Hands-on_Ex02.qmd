@@ -154,12 +154,9 @@ hist(bperm$res,
      breaks = 20,
      xlab = "Simulated Moran's I")
 abline(v = 0, col = "red")
-pacman::p_load(survival, fitdistrplus)
-fit <- fitdist(bperm$res, "norm")
-plot(fit)
 ```
 
-The distribution of the simulation result fits a normal distribution. We can conclude that the data does not violate Moran's I assumption of normality.
+We can see that I approaches 1, meaning similar values are clustered, corroborated Moran's I test result.
 
 We can use ggplot2 to visualize Monte Carlo Moran's I. The plot is slightly different because ggplot2 binning algorithm is different from hist binning algorithm.
 
@@ -216,11 +213,9 @@ summary(bperm$res)
 ```{r}
 hist(bperm$res, freq = TRUE, breaks = 20, xlab = "Simulated Geary's C")
 abline(v = 1, col = "red")
-fitg <- fitdist(bperm$res, "norm")
-plot(fitg)
 ```
 
-The distribution of the simulation result fits a normal distribution. We can conclude that the data does not violate Geary's C assumption of normality.
+We can see that C approaches 0, meaning similar data is clustered.
 
 ## Spatial Correlogram
 
