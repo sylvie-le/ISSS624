@@ -15,6 +15,8 @@ website:
         menu: 
           - text: Spatial Weights and Applications (1)
             href: In-class_Ex/In-class_Ex1/In-class_ex1.qmd
+          - text: Birds of a Feather Flock Together (2)
+            href: In-class_Ex/In-class_Ex2/In-class_Ex2.qmd
     right:
       - href: index.qmd
         text: Home
