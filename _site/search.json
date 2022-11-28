@@ -333,6 +333,20 @@
     "href": "Take-home_Ex/Take-home_Ex1/Take-home_Ex1.html",
     "title": "Take-home Exercise 1: How Functional are the Water Points in Nigeria?",
     "section": "",
-    "text": "Water is a critical asset of all communities and nations. It is the core neccessity to sustain the life of both humans and livestock. Lack of access to potable water can lead to serious health hazards and even conflicts between communities and states. According to a 2022 report by World Bank, about 70 million Nigerians do not have access to drinkable water. Access to piped water has decreased from 39% in 1990 to only 11% in 2021. This phenomenon contributes to a surge in violence in Nigeria when communities Fulani herders ad farmers fight over water supplies."
+    "text": "Water is a critical asset of all communities and nations. It is the core neccessity to sustain the life of both humans and livestock. Lack of access to potable water can lead to serious health hazards and even conflicts between communities and states. According to a 2022 report by World Bank, about 70 million Nigerians do not have access to drinkable water. Access to piped water has decreased from 39% in 1990 to only 11% in 2021. This phenomenon contributes to a surge in violence in Nigeria when communities Fulani herders ad farmers fight over water supplies.\nWhy is there a water crisis in Nigeria? To gain a perspective on the answer, we will examine the quality and distribution of water supply points in Nigeria.\n\n\n\nThe objective of this exercise is to apply appropriate global and local measures of spatial Association techniques to reveals the spatial patterns of Not Functional water points in Nigeria."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex1/Take-home_Ex1.html#setup",
+    "href": "Take-home_Ex/Take-home_Ex1/Take-home_Ex1.html#setup",
+    "title": "Take-home Exercise 1: How Functional are the Water Points in Nigeria?",
+    "section": "Setup",
+    "text": "Setup\n\nData\n\nAspatial Data\nThe aspatial data of water points quality, status and other relevant information is taken from WPdx Global Data Repositories - WPdx+ version. The data set is downloaded in Shapefile format.\n\n\nGeospatial Data\nThe geospatial data of Nigeria administrative regions is downloaded from Geoboundaries. The data level of ADM2, published in 2020, will be used.\n\n\n\nR Packages Used\n\nsf: used for importing, managing, and processing geospatial data\ntidyverse: a collection of packages for data science tasks\ntmap: used for creating thematic maps, such as choropleth and bubble maps\n\nWe load the packages into our working environment using the code below.\n\npacman::p_load(sf, tidyverse, tmap)"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex1/Take-home_Ex1.html#data-wrangling",
+    "href": "Take-home_Ex/Take-home_Ex1/Take-home_Ex1.html#data-wrangling",
+    "title": "Take-home Exercise 1: How Functional are the Water Points in Nigeria?",
+    "section": "Data Wrangling",
+    "text": "Data Wrangling"
   }
 ]

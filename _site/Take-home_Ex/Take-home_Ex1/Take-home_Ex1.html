@@ -20,6 +20,69 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1.6em;
   vertical-align: middle;
 }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
@@ -142,6 +205,12 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#social-context" id="toc-social-context" class="nav-link" data-scroll-target="#social-context">Social Context</a></li>
   <li><a href="#objective" id="toc-objective" class="nav-link" data-scroll-target="#objective">Objective</a></li>
   </ul></li>
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a>
+  <ul class="collapse">
+  <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data">Data</a></li>
+  <li><a href="#r-packages-used" id="toc-r-packages-used" class="nav-link" data-scroll-target="#r-packages-used">R Packages Used</a></li>
+  </ul></li>
+  <li><a href="#data-wrangling" id="toc-data-wrangling" class="nav-link" data-scroll-target="#data-wrangling">Data Wrangling</a></li>
   </ul>
 </nav>
     </div>
@@ -169,12 +238,43 @@ ul.task-list li input[type="checkbox"] {
 <section id="social-context" class="level3">
 <h3 class="anchored" data-anchor-id="social-context">Social Context</h3>
 <p>Water is a critical asset of all communities and nations. It is the core neccessity to sustain the life of both humans and livestock. Lack of access to potable water can lead to serious health hazards and even conflicts between communities and states. According to a 2022 report by World Bank, about 70 million Nigerians do not have access to drinkable water. Access to piped water has decreased from 39% in 1990 to only 11% in 2021. This phenomenon contributes to a surge in violence in Nigeria when communities Fulani herders ad farmers fight over water supplies.</p>
+<p>Why is there a water crisis in Nigeria? To gain a perspective on the answer, we will examine the quality and distribution of water supply points in Nigeria.</p>
 </section>
 <section id="objective" class="level3">
 <h3 class="anchored" data-anchor-id="objective">Objective</h3>
-
-
+<p>The objective of this exercise is to apply appropriate global and local measures of spatial Association techniques to reveals the spatial patterns of Not Functional water points in Nigeria.</p>
 </section>
+</section>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+<section id="data" class="level3">
+<h3 class="anchored" data-anchor-id="data">Data</h3>
+<section id="aspatial-data" class="level4">
+<h4 class="anchored" data-anchor-id="aspatial-data">Aspatial Data</h4>
+<p>The aspatial data of water points quality, status and other relevant information is taken from <a href="https://data.waterpointdata.org/dataset/Water-Point-Data-Exchange-Plus-WPdx-/eqje-vguj/data">WPdx Global Data Repositories - WPdx+ version</a>. The data set is downloaded in Shapefile format.</p>
+</section>
+<section id="geospatial-data" class="level4">
+<h4 class="anchored" data-anchor-id="geospatial-data">Geospatial Data</h4>
+<p>The geospatial data of Nigeria administrative regions is downloaded from <a href="https://www.geoboundaries.org/index.html#getdata">Geoboundaries</a>. The data level of ADM2, published in 2020, will be used.</p>
+</section>
+</section>
+<section id="r-packages-used" class="level3">
+<h3 class="anchored" data-anchor-id="r-packages-used">R Packages Used</h3>
+<ul>
+<li><p><strong>sf</strong>: used for importing, managing, and processing geospatial data</p></li>
+<li><p><strong>tidyverse</strong>: a collection of packages for data science tasks</p></li>
+<li><p><strong>tmap</strong>: used for creating thematic maps, such as choropleth and bubble maps</p></li>
+</ul>
+<p>We load the packages into our working environment using the code below.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, tidyverse, tmap)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="data-wrangling" class="level2">
+<h2 class="anchored" data-anchor-id="data-wrangling">Data Wrangling</h2>
+
+
 </section>
 
 </main> <!-- /main -->
