@@ -45,3 +45,5 @@ pacman::p_load(sf, tidyverse, tmap)
 ```
 
 ## Data Wrangling
+
+Aspatial Data
