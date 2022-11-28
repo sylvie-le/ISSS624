@@ -4,6 +4,10 @@ editor: visual
 execute: 
   warning: false
   message: false
+format: 
+  html:
+    code-fold: true
+    code-summary: "Show code"
 ---
 
 ## Overview
@@ -34,16 +38,310 @@ The geospatial data of Nigeria administrative regions is downloaded from [Geobou
 
 -   **sf**: used for importing, managing, and processing geospatial data
 
--   **tidyverse**: a collection of packages for data science tasks
+-   **tidyverse**: a collection of packages for data science tasks. It contains the sub-packages dplyr, ggplot2, forcats, tibble, readr, stringr, tidyr, purrr
 
 -   **tmap**: used for creating thematic maps, such as choropleth and bubble maps
+
+-   **spdep**: used for calculating spatial dependence - weighting schemes and statistics
+
+-   **funModeling**: used for EDA and data preparation
 
 We load the packages into our working environment using the code below.
 
 ```{r}
-pacman::p_load(sf, tidyverse, tmap)
+pacman::p_load(sf, tidyverse, tmap, spdep, funModeling)
 ```
 
-## Data Wrangling
+## Importing Data
 
-Aspatial Data
+### Importing Nigeria water point geospatial data
+
+The data from WPdx Global Data Repositories comes in four files in dbf, prj, shp, shx formats. The files are renamed into `geo_export` for a more convenient reference.
+
+Using `st_read()` from the **sf** package, we import the aspatial data into our working environment. The data is imported as a simple feature data table.
+
+```{r}
+#| eval: false
+wp <- st_read(dsn = "data", layer = "geo_export")
+```
+
+### Importing Nigeria ADM2 aspatial data
+
+The data from Geoboundaries comes in six files in dbf, geojson, prj, shp, shx, topojson formats. The files are renamed to `NGA-ADM2` for easier reference. To import these files as a simple feature data table, we also use `st_read().`
+
+```{r}
+#| eval: false
+nga <- st_read(dsn = "data", layer = "NGA-ADM2")
+```
+
+## Exploratory Data Analysis and Data Wrangling
+
+The goals of this step include:
+
+-   Examine the data structure and format, ensure consistent format between geospatial and aspatial data.
+
+-   Study the content of the data tables and filter out data that are not related to water points in Nigeria.
+
+-   Explore data type and data validity relating to the functionality of water points in Nigeria, transform the data where necessary.
+
+### `wp` geospatial data
+
+#### Checking the CRS of geospatial data
+
+First, we use `st_geometry()` to check the geometry list column of `wp`. There are 406,566 observations under the WGS84 coordinate reference system (CRS). Let's take notes that the geometry type is `point` 🔑
+
+```{r}
+#| eval: false
+st_geometry(wp)
+```
+
+Since the shapefile is in WGS84 CRS, we will assign `crs = 4326` to `wp`. 4326 is the code of WGS84 in EPSG code. The task is conducted using `st_set_crs()`.
+
+```{r}
+#| eval: false
+wp <- st_set_crs(wp, 4326)
+```
+
+#### Filtering relevant information
+
+Next, we will examine the attributes in the data table using `glimpse()` from **dplyr**.
+
+```{r}
+#| eval: false
+glimpse(wp)
+```
+
+We notice that in the `clean_coun` column, there are many countries name such as Malawi, Ghana, Sierra Leone, etc. This means that the `wp` data set contains the information of other countries besides Nigeria. `filter()` of the package **dplyr** is used to get the data that only belongs to Nigeria.
+
+```{r}
+#| eval: false
+wp <- wp %>% filter(clean_coun == "Nigeria")
+```
+
+Now we will examine the filtered `wp` data set using `head()` of Base R. The function reveals that `wp` now only contains Nigeria-relevant data.
+
+```{r}
+#| eval: false
+head(wp, n = 5)
+```
+
+Now we will write the filtered data table into a new `rds` file named `wp_nga` using the `write_rds()` function from the **sf** package.
+
+```{r}
+#| eval: false
+write_rds(wp, "data/wp_nga.rds")
+```
+
+From this point on, we will work on the `wp_nga` file.
+
+#### Exploring the water point status data
+
+From the result of the code above, we notice that column `status_cle` has NA values. Since our goal is to examine the functionality of the water points, the data in `status_cle` should be transformed to remove the NA values. One way to do it is to recode the NA values to "Unknown". `replace_na()` from the **tidyr** package is used to do the mentioned task.
+
+To preserve the existing variables while adding new ones, `mutate()` from the **dplyr** package is used.
+
+All changes are written into the `wp_nga` file using `read_rds()`.
+
+```{r}
+#| eval: false
+wp_nga <- read_rds("data/wp_nga.rds") %>%
+  mutate(status_cle = replace_na(status_cle, "Unknown"))
+```
+
+Let's look at the distribution of `status_cle`. We will use `freq()` from the **funModeling** package for this task.
+
+```{r}
+#| eval: false
+freq(data=wp_nga, 
+     input = 'status_cle')
+```
+
+We can see that there are two variables that carry the same meaning: *Non-Functional due to dry season* and *Non functional due to dry season*. We will use `replace()` from **dplyr** to do this task.
+
+```{r}
+#| eval: false
+wp_nga <- read_rds("data/wp_nga.rds") %>%
+  mutate(status_cle = replace(status_cle, status_cle == "Non functional due to dry season", "Non-Functional due to dry season")) %>%
+  mutate(status_cle = replace_na(status_cle, "Unknown"))
+```
+
+Let's re-examine the distribution of `status_cle`.
+
+```{r}
+#| eval: false
+freq(data=wp_nga, 
+     input = 'status_cle')
+```
+
+#### Extracting non-functional water point data
+
+Non-functional water points are defined as those which are not functional or abandoned. Using `filter()` from the dplyr package, we will save the non-functional water point data into a simple feature data table named `wpt_nonfunctional`.
+
+```{r}
+#| eval: false
+wpt_nonfunctional <- wp_nga %>%
+  filter(status_cle %in%
+           c("Abandoned/Decommissioned", 
+             "Abandoned",
+             "Non-Functional",
+             "Non-Functional due to dry season"))
+```
+
+Now we can inspect the distribution of non-functional water points by type using `freq()`.
+
+```{r}
+#| eval: false
+freq(data = wpt_nonfunctional, input = "status_cle")
+```
+
+### `nga` aspatial data
+
+#### Checking the CRS of aspatial data
+
+We will check the CRS of `nga` using `st_geometry()`.
+
+```{r}
+#| eval: false
+st_geometry(nga)
+```
+
+As the CRS of `nga` is WGS84, we will assign `crs = 4326` using `st_set_crs()`.
+
+```{r}
+#| eval: false
+nga <- st_set_crs(nga, 4326)
+```
+
+Next, we plot the geometry using `plot()` of Base R. As our data is the regions of Nigeria by administrative division management level 2, the map below depicts the [774 Local Government Areas of Nigeria](https://en.wikipedia.org/wiki/Local_government_areas_of_Nigeria).
+
+From the map, it is noticeable that the size of government areas varies significantly. Let's keep this in mind for further analysis 💪
+
+```{r}
+#| eval: false
+plot(st_geometry(nga))
+```
+
+### Performing Point-in-Polygon Count
+
+Because the geometry type of our geospatial data is `point`, we need to compute the number of points inside each polygon. The functions below will be used for that task.
+
+-   `mutate()`: preserves the existing variables while adding new variables, from **dplyr** package
+
+-   `st_intersects()`: spatial intersect predicate for stars and sfc object, from **stars** package, a sub-package of **tmap**.
+
+-   `lengths()`: get the length of each element of a list or atomic vector as an integer or numeric vector, from Base R.
+
+```{r}
+#| eval: false
+nga_wp <- nga %>%
+  mutate(`total wpt` = lengths(
+    st_intersects(nga, wp_nga))) %>% 
+  mutate(`wpt non-functional` = lengths(
+    st_intersects(nga, wpt_nonfunctional)))
+```
+
+### Saving the analytical data table
+
+Before saving the data table, we will compute the percentage of non-functional water points over the total number of water points in Nigeria.
+
+```{r}
+#| eval: false
+nga_wp <- nga_wp %>% 
+  mutate(`pct_non-functional` = `wpt non-functional`/`total wpt`)
+```
+
+Now, we will save the sf data table `nga_wp` into a new rds file.
+
+```{r}
+#| eval: false
+write_rds(nga_wp, "data/nga_wp.rds")
+```
+
+## Visualizing the Data
+
+First, let's reload the `nga_wp.rds` file into our working environment.
+
+```{r}
+nga_wp <- read_rds("data/nga_wp.rds")
+```
+
+### Distribution of non-functional water points
+
+To create the plots, we will use the `tm_shape()` and `tm_fill()` functions from **tmap** package. In addition, `tm_borders()` and `tm_layout()` will be used to customize the style of the map. Below are the functionality of the functions.
+
+-   `tm_shape`: creates a tmap element that specifies the spatial data object.
+
+-   `tm_fill`: creates a tmap element that draws the polygons.
+
+-   `tm_borders`: creates a tmap element that defines the border of the polygons.
+
+-   `tm_layout`: specifies the map layout
+
+```{r}
+wp_pretty <- tm_shape(nga_wp) + 
+  tm_fill("wpt non-functional",
+          title = "Water Point Count") +
+  tm_layout(main.title = "Pretty Classification",
+            main.title.position = "center",
+            main.title.size = 2,
+            legend.height = 0.25,
+            legend.width = 0.3,
+            legend.position = c("right", "bottom"),
+            frame = FALSE) +
+  tm_borders(alpha = 0.5)
+
+wp_quantile <- tm_shape(nga_wp) + 
+  tm_fill("wpt non-functional",
+          title = "Water Point Count",
+          style = "quantile") +
+  tm_layout(main.title = "Quantile Classification",
+            main.title.position = "center",
+            main.title.size = 2,
+            legend.height = 0.25,
+            legend.width = 0.3,
+            legend.position = c("right", "bottom"),
+            frame = FALSE) +
+  tm_borders(alpha = 0.5)
+
+wp_equal <- tm_shape(nga_wp) + 
+  tm_fill("wpt non-functional",
+          title = "Water Point Count",
+          style = "equal") +
+  tm_layout(main.title = "Equal Classification",
+            main.title.position = "center",
+            main.title.size = 2,
+            legend.height = 0.25,
+            legend.width = 0.3,
+            legend.position = c("right", "bottom"),
+            frame = FALSE) +
+  tm_borders(alpha = 0.5)
+
+wp_jenks <- tm_shape(nga_wp) + 
+  tm_fill("wpt non-functional",
+          title = "Water Point Count",
+          style = "jenks") +
+  tm_layout(main.title = "Jenks Classification",
+            main.title.position = "center",
+            main.title.size = 2,
+            legend.height = 0.25,
+            legend.width = 0.3,
+            legend.position = c("right", "bottom"),
+            frame = FALSE) +
+  tm_borders(alpha = 0.5)
+```
+
+```{r}
+#| echo: false
+wp_equal
+wp_pretty
+wp_jenks
+wp_quantile
+```
+
+From the maps above, we can see that different interval classification produces different map views.
+
+`pretty` and `equal` methods divide the values into groups of equally-spaced values, so they can smooth out the distribution of non-functional water points.
+
+The `quantile` method produces a rather dire situation with a large area of land having the highest numbers of non-functional water points. However, the range of the highest quantile is relatively huge comparing to other quantiles, suggesting high variance data. We can say that the quantile method exaggerates the disfunctionality of water points in Nigeria due to outliers.
+
+The `Jenks` method produces well-balanced intervals. By definition, the Jenks method defines intervals so that they have the smallest in-class variance. This makes the Jenks method more suitable for high-variance data sets like `nga_wp`.

@@ -210,7 +210,22 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data">Data</a></li>
   <li><a href="#r-packages-used" id="toc-r-packages-used" class="nav-link" data-scroll-target="#r-packages-used">R Packages Used</a></li>
   </ul></li>
-  <li><a href="#data-wrangling" id="toc-data-wrangling" class="nav-link" data-scroll-target="#data-wrangling">Data Wrangling</a></li>
+  <li><a href="#importing-data" id="toc-importing-data" class="nav-link" data-scroll-target="#importing-data">Importing Data</a>
+  <ul class="collapse">
+  <li><a href="#importing-nigeria-water-point-geospatial-data" id="toc-importing-nigeria-water-point-geospatial-data" class="nav-link" data-scroll-target="#importing-nigeria-water-point-geospatial-data">Importing Nigeria water point geospatial data</a></li>
+  <li><a href="#importing-nigeria-adm2-aspatial-data" id="toc-importing-nigeria-adm2-aspatial-data" class="nav-link" data-scroll-target="#importing-nigeria-adm2-aspatial-data">Importing Nigeria ADM2 aspatial data</a></li>
+  </ul></li>
+  <li><a href="#exploratory-data-analysis-and-data-wrangling" id="toc-exploratory-data-analysis-and-data-wrangling" class="nav-link" data-scroll-target="#exploratory-data-analysis-and-data-wrangling">Exploratory Data Analysis and Data Wrangling</a>
+  <ul class="collapse">
+  <li><a href="#wp-geospatial-data" id="toc-wp-geospatial-data" class="nav-link" data-scroll-target="#wp-geospatial-data"><code>wp</code> geospatial data</a></li>
+  <li><a href="#nga-aspatial-data" id="toc-nga-aspatial-data" class="nav-link" data-scroll-target="#nga-aspatial-data"><code>nga</code> aspatial data</a></li>
+  <li><a href="#performing-point-in-polygon-count" id="toc-performing-point-in-polygon-count" class="nav-link" data-scroll-target="#performing-point-in-polygon-count">Performing Point-in-Polygon Count</a></li>
+  <li><a href="#saving-the-analytical-data-table" id="toc-saving-the-analytical-data-table" class="nav-link" data-scroll-target="#saving-the-analytical-data-table">Saving the analytical data table</a></li>
+  </ul></li>
+  <li><a href="#visualizing-the-data" id="toc-visualizing-the-data" class="nav-link" data-scroll-target="#visualizing-the-data">Visualizing the Data</a>
+  <ul class="collapse">
+  <li><a href="#distribution-of-non-functional-water-points" id="toc-distribution-of-non-functional-water-points" class="nav-link" data-scroll-target="#distribution-of-non-functional-water-points">Distribution of non-functional water points</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -262,20 +277,324 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h3 class="anchored" data-anchor-id="r-packages-used">R Packages Used</h3>
 <ul>
 <li><p><strong>sf</strong>: used for importing, managing, and processing geospatial data</p></li>
-<li><p><strong>tidyverse</strong>: a collection of packages for data science tasks</p></li>
+<li><p><strong>tidyverse</strong>: a collection of packages for data science tasks. It contains the sub-packages dplyr, ggplot2, forcats, tibble, readr, stringr, tidyr, purrr</p></li>
 <li><p><strong>tmap</strong>: used for creating thematic maps, such as choropleth and bubble maps</p></li>
+<li><p><strong>spdep</strong>: used for calculating spatial dependence - weighting schemes and statistics</p></li>
+<li><p><strong>funModeling</strong>: used for EDA and data preparation</p></li>
 </ul>
 <p>We load the packages into our working environment using the code below.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, tidyverse, tmap)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, tidyverse, tmap, spdep, funModeling)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 </section>
 </section>
-<section id="data-wrangling" class="level2">
-<h2 class="anchored" data-anchor-id="data-wrangling">Data Wrangling</h2>
-<p>Aspatial Data</p>
+<section id="importing-data" class="level2">
+<h2 class="anchored" data-anchor-id="importing-data">Importing Data</h2>
+<section id="importing-nigeria-water-point-geospatial-data" class="level3">
+<h3 class="anchored" data-anchor-id="importing-nigeria-water-point-geospatial-data">Importing Nigeria water point geospatial data</h3>
+<p>The data from WPdx Global Data Repositories comes in four files in dbf, prj, shp, shx formats. The files are renamed into <code>geo_export</code> for a more convenient reference.</p>
+<p>Using <code>st_read()</code> from the <strong>sf</strong> package, we import the aspatial data into our working environment. The data is imported as a simple feature data table.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>wp <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data"</span>, <span class="at">layer =</span> <span class="st">"geo_export"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="importing-nigeria-adm2-aspatial-data" class="level3">
+<h3 class="anchored" data-anchor-id="importing-nigeria-adm2-aspatial-data">Importing Nigeria ADM2 aspatial data</h3>
+<p>The data from Geoboundaries comes in six files in dbf, geojson, prj, shp, shx, topojson formats. The files are renamed to <code>NGA-ADM2</code> for easier reference. To import these files as a simple feature data table, we also use <code>st_read().</code></p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>nga <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data"</span>, <span class="at">layer =</span> <span class="st">"NGA-ADM2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="exploratory-data-analysis-and-data-wrangling" class="level2">
+<h2 class="anchored" data-anchor-id="exploratory-data-analysis-and-data-wrangling">Exploratory Data Analysis and Data Wrangling</h2>
+<p>The goals of this step include:</p>
+<ul>
+<li><p>Examine the data structure and format, ensure consistent format between geospatial and aspatial data.</p></li>
+<li><p>Study the content of the data tables and filter out data that are not related to water points in Nigeria.</p></li>
+<li><p>Explore data type and data validity relating to the functionality of water points in Nigeria, transform the data where necessary.</p></li>
+</ul>
+<section id="wp-geospatial-data" class="level3">
+<h3 class="anchored" data-anchor-id="wp-geospatial-data"><code>wp</code> geospatial data</h3>
+<section id="checking-the-crs-of-geospatial-data" class="level4">
+<h4 class="anchored" data-anchor-id="checking-the-crs-of-geospatial-data">Checking the CRS of geospatial data</h4>
+<p>First, we use <code>st_geometry()</code> to check the geometry list column of <code>wp</code>. There are 406,566 observations under the WGS84 coordinate reference system (CRS). Let’s take notes that the geometry type is <code>point</code> 🔑</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_geometry</span>(wp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Since the shapefile is in WGS84 CRS, we will assign <code>crs = 4326</code> to <code>wp</code>. 4326 is the code of WGS84 in EPSG code. The task is conducted using <code>st_set_crs()</code>.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>wp <span class="ot">&lt;-</span> <span class="fu">st_set_crs</span>(wp, <span class="dv">4326</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="filtering-relevant-information" class="level4">
+<h4 class="anchored" data-anchor-id="filtering-relevant-information">Filtering relevant information</h4>
+<p>Next, we will examine the attributes in the data table using <code>glimpse()</code> from <strong>dplyr</strong>.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(wp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>We notice that in the <code>clean_coun</code> column, there are many countries name such as Malawi, Ghana, Sierra Leone, etc. This means that the <code>wp</code> data set contains the information of other countries besides Nigeria. <code>filter()</code> of the package <strong>dplyr</strong> is used to get the data that only belongs to Nigeria.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>wp <span class="ot">&lt;-</span> wp <span class="sc">%&gt;%</span> <span class="fu">filter</span>(clean_coun <span class="sc">==</span> <span class="st">"Nigeria"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Now we will examine the filtered <code>wp</code> data set using <code>head()</code> of Base R. The function reveals that <code>wp</code> now only contains Nigeria-relevant data.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(wp, <span class="at">n =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Now we will write the filtered data table into a new <code>rds</code> file named <code>wp_nga</code> using the <code>write_rds()</code> function from the <strong>sf</strong> package.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(wp, <span class="st">"data/wp_nga.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>From this point on, we will work on the <code>wp_nga</code> file.</p>
+</section>
+<section id="exploring-the-water-point-status-data" class="level4">
+<h4 class="anchored" data-anchor-id="exploring-the-water-point-status-data">Exploring the water point status data</h4>
+<p>From the result of the code above, we notice that column <code>status_cle</code> has NA values. Since our goal is to examine the functionality of the water points, the data in <code>status_cle</code> should be transformed to remove the NA values. One way to do it is to recode the NA values to “Unknown”. <code>replace_na()</code> from the <strong>tidyr</strong> package is used to do the mentioned task.</p>
+<p>To preserve the existing variables while adding new ones, <code>mutate()</code> from the <strong>dplyr</strong> package is used.</p>
+<p>All changes are written into the <code>wp_nga</code> file using <code>read_rds()</code>.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>wp_nga <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">"data/wp_nga.rds"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">status_cle =</span> <span class="fu">replace_na</span>(status_cle, <span class="st">"Unknown"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Let’s look at the distribution of <code>status_cle</code>. We will use <code>freq()</code> from the <strong>funModeling</strong> package for this task.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">freq</span>(<span class="at">data=</span>wp_nga, </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">input =</span> <span class="st">'status_cle'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>We can see that there are two variables that carry the same meaning: <em>Non-Functional due to dry season</em> and <em>Non functional due to dry season</em>. We will use <code>replace()</code> from <strong>dplyr</strong> to do this task.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>wp_nga <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">"data/wp_nga.rds"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">status_cle =</span> <span class="fu">replace</span>(status_cle, status_cle <span class="sc">==</span> <span class="st">"Non functional due to dry season"</span>, <span class="st">"Non-Functional due to dry season"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">status_cle =</span> <span class="fu">replace_na</span>(status_cle, <span class="st">"Unknown"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Let’s re-examine the distribution of <code>status_cle</code>.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">freq</span>(<span class="at">data=</span>wp_nga, </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">input =</span> <span class="st">'status_cle'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="extracting-non-functional-water-point-data" class="level4">
+<h4 class="anchored" data-anchor-id="extracting-non-functional-water-point-data">Extracting non-functional water point data</h4>
+<p>Non-functional water points are defined as those which are not functional or abandoned. Using <code>filter()</code> from the dplyr package, we will save the non-functional water point data into a simple feature data table named <code>wpt_nonfunctional</code>.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>wpt_nonfunctional <span class="ot">&lt;-</span> wp_nga <span class="sc">%&gt;%</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(status_cle <span class="sc">%in%</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>           <span class="fu">c</span>(<span class="st">"Abandoned/Decommissioned"</span>, </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>             <span class="st">"Abandoned"</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>             <span class="st">"Non-Functional"</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>             <span class="st">"Non-Functional due to dry season"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Now we can inspect the distribution of non-functional water points by type using <code>freq()</code>.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">freq</span>(<span class="at">data =</span> wpt_nonfunctional, <span class="at">input =</span> <span class="st">"status_cle"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="nga-aspatial-data" class="level3">
+<h3 class="anchored" data-anchor-id="nga-aspatial-data"><code>nga</code> aspatial data</h3>
+<section id="checking-the-crs-of-aspatial-data" class="level4">
+<h4 class="anchored" data-anchor-id="checking-the-crs-of-aspatial-data">Checking the CRS of aspatial data</h4>
+<p>We will check the CRS of <code>nga</code> using <code>st_geometry()</code>.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_geometry</span>(nga)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>As the CRS of <code>nga</code> is WGS84, we will assign <code>crs = 4326</code> using <code>st_set_crs()</code>.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>nga <span class="ot">&lt;-</span> <span class="fu">st_set_crs</span>(nga, <span class="dv">4326</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Next, we plot the geometry using <code>plot()</code> of Base R. As our data is the regions of Nigeria by administrative division management level 2, the map below depicts the <a href="https://en.wikipedia.org/wiki/Local_government_areas_of_Nigeria">774 Local Government Areas of Nigeria</a>.</p>
+<p>From the map, it is noticeable that the size of government areas varies significantly. Let’s keep this in mind for further analysis 💪</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(nga))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="performing-point-in-polygon-count" class="level3">
+<h3 class="anchored" data-anchor-id="performing-point-in-polygon-count">Performing Point-in-Polygon Count</h3>
+<p>Because the geometry type of our geospatial data is <code>point</code>, we need to compute the number of points inside each polygon. The functions below will be used for that task.</p>
+<ul>
+<li><p><code>mutate()</code>: preserves the existing variables while adding new variables, from <strong>dplyr</strong> package</p></li>
+<li><p><code>st_intersects()</code>: spatial intersect predicate for stars and sfc object, from <strong>stars</strong> package, a sub-package of <strong>tmap</strong>.</p></li>
+<li><p><code>lengths()</code>: get the length of each element of a list or atomic vector as an integer or numeric vector, from Base R.</p></li>
+</ul>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>nga_wp <span class="ot">&lt;-</span> nga <span class="sc">%&gt;%</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">total wpt</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">lengths</span>(</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">st_intersects</span>(nga, wp_nga))) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">wpt non-functional</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">lengths</span>(</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">st_intersects</span>(nga, wpt_nonfunctional)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="saving-the-analytical-data-table" class="level3">
+<h3 class="anchored" data-anchor-id="saving-the-analytical-data-table">Saving the analytical data table</h3>
+<p>Before saving the data table, we will compute the percentage of non-functional water points over the total number of water points in Nigeria.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>nga_wp <span class="ot">&lt;-</span> nga_wp <span class="sc">%&gt;%</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">pct_non-functional</span><span class="st">`</span> <span class="ot">=</span> <span class="st">`</span><span class="at">wpt non-functional</span><span class="st">`</span><span class="sc">/</span><span class="st">`</span><span class="at">total wpt</span><span class="st">`</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Now, we will save the sf data table <code>nga_wp</code> into a new rds file.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(nga_wp, <span class="st">"data/nga_wp.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="visualizing-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="visualizing-the-data">Visualizing the Data</h2>
+<p>First, let’s reload the <code>nga_wp.rds</code> file into our working environment.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>nga_wp <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">"data/nga_wp.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="distribution-of-non-functional-water-points" class="level3">
+<h3 class="anchored" data-anchor-id="distribution-of-non-functional-water-points">Distribution of non-functional water points</h3>
+<p>To create the plots, we will use the <code>tm_shape()</code> and <code>tm_fill()</code> functions from <strong>tmap</strong> package. In addition, <code>tm_borders()</code> and <code>tm_layout()</code> will be used to customize the style of the map. Below are the functionality of the functions.</p>
+<ul>
+<li><p><code>tm_shape</code>: creates a tmap element that specifies the spatial data object.</p></li>
+<li><p><code>tm_fill</code>: creates a tmap element that draws the polygons.</p></li>
+<li><p><code>tm_borders</code>: creates a tmap element that defines the border of the polygons.</p></li>
+<li><p><code>tm_layout</code>: specifies the map layout</p></li>
+</ul>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>wp_pretty <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(nga_wp) <span class="sc">+</span> </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(<span class="st">"wpt non-functional"</span>,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">title =</span> <span class="st">"Water Point Count"</span>) <span class="sc">+</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"Pretty Classification"</span>,</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">main.title.position =</span> <span class="st">"center"</span>,</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">main.title.size =</span> <span class="dv">2</span>,</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.height =</span> <span class="fl">0.25</span>,</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.width =</span> <span class="fl">0.3</span>,</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.position =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"bottom"</span>),</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">frame =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>)</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>wp_quantile <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(nga_wp) <span class="sc">+</span> </span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(<span class="st">"wpt non-functional"</span>,</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>          <span class="at">title =</span> <span class="st">"Water Point Count"</span>,</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>          <span class="at">style =</span> <span class="st">"quantile"</span>) <span class="sc">+</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"Quantile Classification"</span>,</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">main.title.position =</span> <span class="st">"center"</span>,</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">main.title.size =</span> <span class="dv">2</span>,</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.height =</span> <span class="fl">0.25</span>,</span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.width =</span> <span class="fl">0.3</span>,</span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.position =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"bottom"</span>),</span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>            <span class="at">frame =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>)</span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>wp_equal <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(nga_wp) <span class="sc">+</span> </span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(<span class="st">"wpt non-functional"</span>,</span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>          <span class="at">title =</span> <span class="st">"Water Point Count"</span>,</span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>          <span class="at">style =</span> <span class="st">"equal"</span>) <span class="sc">+</span></span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"Equal Classification"</span>,</span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>            <span class="at">main.title.position =</span> <span class="st">"center"</span>,</span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>            <span class="at">main.title.size =</span> <span class="dv">2</span>,</span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.height =</span> <span class="fl">0.25</span>,</span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.width =</span> <span class="fl">0.3</span>,</span>
+<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.position =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"bottom"</span>),</span>
+<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a>            <span class="at">frame =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>)</span>
+<span id="cb23-38"><a href="#cb23-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-39"><a href="#cb23-39" aria-hidden="true" tabindex="-1"></a>wp_jenks <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(nga_wp) <span class="sc">+</span> </span>
+<span id="cb23-40"><a href="#cb23-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(<span class="st">"wpt non-functional"</span>,</span>
+<span id="cb23-41"><a href="#cb23-41" aria-hidden="true" tabindex="-1"></a>          <span class="at">title =</span> <span class="st">"Water Point Count"</span>,</span>
+<span id="cb23-42"><a href="#cb23-42" aria-hidden="true" tabindex="-1"></a>          <span class="at">style =</span> <span class="st">"jenks"</span>) <span class="sc">+</span></span>
+<span id="cb23-43"><a href="#cb23-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"Jenks Classification"</span>,</span>
+<span id="cb23-44"><a href="#cb23-44" aria-hidden="true" tabindex="-1"></a>            <span class="at">main.title.position =</span> <span class="st">"center"</span>,</span>
+<span id="cb23-45"><a href="#cb23-45" aria-hidden="true" tabindex="-1"></a>            <span class="at">main.title.size =</span> <span class="dv">2</span>,</span>
+<span id="cb23-46"><a href="#cb23-46" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.height =</span> <span class="fl">0.25</span>,</span>
+<span id="cb23-47"><a href="#cb23-47" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.width =</span> <span class="fl">0.3</span>,</span>
+<span id="cb23-48"><a href="#cb23-48" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.position =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"bottom"</span>),</span>
+<span id="cb23-49"><a href="#cb23-49" aria-hidden="true" tabindex="-1"></a>            <span class="at">frame =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb23-50"><a href="#cb23-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="Take-home_Ex1_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex1_files/figure-html/unnamed-chunk-24-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex1_files/figure-html/unnamed-chunk-24-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex1_files/figure-html/unnamed-chunk-24-4.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>From the maps above, we can see that different interval classification produces different map views.</p>
+<p><code>pretty</code> and <code>equal</code> methods divide the values into groups of equally-spaced values, so they can smooth out the distribution of non-functional water points.</p>
+<p>The <code>quantile</code> method produces a rather dire situation with a large area of land having the highest numbers of non-functional water points. However, the range of the highest quantile is relatively huge comparing to other quantiles, suggesting high variance data. We can say that the quantile method exaggerates the disfunctionality of water points in Nigeria due to outliers.</p>
+<p>The <code>Jenks</code> method produces well-balanced intervals. By definition, the Jenks method defines intervals so that they have the smallest in-class variance. This makes the Jenks method more suitable for high-variance data sets like <code>nga_wp</code>.</p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
