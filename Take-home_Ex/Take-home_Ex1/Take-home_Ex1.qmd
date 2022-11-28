@@ -1,0 +1,15 @@
+---
+title: "Take-home Exercise 1: How Functional are the Water Points in Nigeria?"
+editor: visual
+execute: 
+  warning: false
+  message: false
+---
+
+## Overview
+
+### Social Context
+
+Water is a critical asset of all communities and nations. It is the core neccessity to sustain the life of both humans and livestock. Lack of access to potable water can lead to serious health hazards and even conflicts between communities and states. According to a 2022 report by World Bank, about 70 million Nigerians do not have access to drinkable water. Access to piped water has decreased from 39% in 1990 to only 11% in 2021. This phenomenon contributes to a surge in violence in Nigeria when communities Fulani herders ad farmers fight over water supplies.
+
+### Objective

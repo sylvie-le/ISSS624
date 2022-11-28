@@ -7,16 +7,20 @@ website:
     left: 
       - text: Hands-on Exercises
         menu: 
-          - text: Data Wrangling and Choropleth Map (1)
+          - text: Hands-on Exercise 1
             href: Hands-on_Ex/Hands-on_Ex01.qmd
-          - text: Global and Local Measures of Spatial Autocorrelation (2)
+          - text: Hands-on Exercise 2
             href: Hands-on_Ex/Hands-on_Ex02.qmd
       - text: In-class Exercises
         menu: 
-          - text: Spatial Weights and Applications (1)
+          - text: In-class Exercise 1
             href: In-class_Ex/In-class_Ex1/In-class_ex1.qmd
-          - text: Birds of a Feather Flock Together (2)
+          - text: In-class Exercise 2
             href: In-class_Ex/In-class_Ex2/In-class_Ex2.qmd
+      - text: Take-home Exercises
+        menu: 
+          - text: Take-home Exercise 1
+            href: Take-home_Ex/Take-home_Ex1/Take-home_Ex1.qmd
     right:
       - href: index.qmd
         text: Home

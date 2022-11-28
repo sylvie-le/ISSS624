@@ -327,5 +327,12 @@
     "title": "Birds of a feather flock together: Do functionally similar water points positively co-occur in Nigeria?",
     "section": "Visualising the spatial dsitribution of water points",
     "text": "Visualising the spatial dsitribution of water points\n\nnga_wp <- read_rds(\"data/nga_wp.rds\")\ntotal <- qtm(nga_wp, \"total wpt\") + tm_layout(legend.text.size = 0.4, legend.title.size = 0.5)\nwp_functional <- qtm(nga_wp, \"wpt functional\") + tm_layout(legend.text.size = 0.4, legend.title.size = 0.5)\nwp_nonfunctional <- qtm(nga_wp, \"wpt non-functional\") + tm_layout(legend.text.size = 0.4, legend.title.size = 0.5)\nunknown <- qtm(nga_wp, \"wpt unknown\") + tm_layout(legend.text.size = 0.4, legend.title.size = 0.5)\n\ntmap_arrange(total, wp_functional, wp_nonfunctional, unknown, nrow = 2, ncol=2)"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex1/Take-home_Ex1.html",
+    "href": "Take-home_Ex/Take-home_Ex1/Take-home_Ex1.html",
+    "title": "Take-home Exercise 1: How Functional are the Water Points in Nigeria?",
+    "section": "",
+    "text": "Water is a critical asset of all communities and nations. It is the core neccessity to sustain the life of both humans and livestock. Lack of access to potable water can lead to serious health hazards and even conflicts between communities and states. According to a 2022 report by World Bank, about 70 million Nigerians do not have access to drinkable water. Access to piped water has decreased from 39% in 1990 to only 11% in 2021. This phenomenon contributes to a surge in violence in Nigeria when communities Fulani herders ad farmers fight over water supplies."
   }
 ]
