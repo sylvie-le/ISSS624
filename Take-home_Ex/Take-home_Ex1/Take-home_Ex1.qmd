@@ -402,7 +402,7 @@ coords <- cbind(longitude, latitude)
 wp_k8 <- knn2nb(knearneigh(coords, k = 8))
 ```
 
-We can display the content of `wp_k8` matrix using `str()`. Each feature has 8 neighbors.
+Displaying the content of `wp_k8` matrix using `str()`. Each feature has 8 neighbors.
 
 ```{r}
 str(wp_k8)
@@ -411,6 +411,120 @@ str(wp_k8)
 Now we can plot the adaptive spatial weight matrix.
 
 ```{r}
-plot(nga_wp$geometry, border = "lightgrey")
+plot(nga_wp$geometry, border = "lightgrey", main = "K Nearest Neighbor Matrix")
 plot(wp_k8, coords, pch = 19, cex = 0.2, add = TRUE, col = "red")
 ```
+
+#### Row standardized weight matrix
+
+We will compute a row standardized weight matrix based on `wp_k8` by using `nb2listw()` from **spdep** package.
+
+```{r}
+wp_rsw <- nb2listw(wp_k8, style = "W", zero.policy = TRUE)
+wp_rsw
+```
+
+### Global Spatial Autocorrelation: Moran's I
+
+#### Moran's I test
+
+To perform the Moran's I test, we will use `moran.test()` from **spdep** package.
+
+```{r}
+moran.test(nga_wp$`wpt non-functional`, listw = wp_rsw, zero.policy = TRUE, na.action = na.omit)
+```
+
+Because the p-value of the test is less than 0.05, we reject the null hypothesis that the non-functional water points are spatially random at 95% confident interval. As the Moran statistic is 0.383, greater than 0, we can say that the non-functional water point observations are clustered.
+
+#### Monte Carlo Moran's I
+
+To compute 1,000 simulations of Monte Carlo Moran's I, we will use `moran.mc()` from **spdep** package.
+
+```{r}
+set.seed(1234)
+mc_moran = moran.mc(nga_wp$`wpt non-functional`,
+                    listw = wp_rsw,
+                    nsim = 999,
+                    zero.policy = TRUE,
+                    na.action = na.omit)
+mc_moran
+```
+
+As p-value is 0.001 and less than 0.05, we reject the null hypothesis of spatial randomness among the non-functional water point observations. The statistic of the Moran's I simulations is 0.3831, greater than 0, corroborating the test result that similar non-functional water point observations are clustered.
+
+#### Visualzing Monte Carlo Moran's I
+
+```{r}
+summary(mc_moran$res)
+```
+
+```{r}
+hist(mc_moran$res,
+     freq = TRUE,
+     breaks = 20,
+     xlab = "Simulated Moran's I",
+     main = "Histogram of Moran's I Simulation")
+abline(v = 0, col = "red")
+```
+
+We can see that the min of the Moran's I value is less than 0, while the max value is 0.38. The Moran's I data is approaching 1, inferring similar values are clustered. In layman terms, government areas with similar number of non-functional water points tend to be closer together and form some clusters.
+
+### Global Spatial Autocorrelation: Geary's C
+
+The following section will focus on Geary's C test and Geary's C Monte Carlo simulation using the functions from **spdep** package.
+
+#### Geary's C Test
+
+```{r}
+geary.test(nga_wp$`wpt non-functional`, listw = wp_rsw)
+```
+
+Because p-value is 0.001 and less than 0.05, we reject the null hypothesis of spatial randomness among the non-functional water point observations with 95% confident interval. The statistic of the Geary's C simulations is 0.605, less than 1, we can say that the data tend to cluster among similar observations.
+
+#### Monte Carlo Geary's C
+
+We will compute 1000 simulations of Geary's C using `geary.mc()`.
+
+```{r}
+set.seed(1234)
+mc_geary = geary.mc(nga_wp$`wpt non-functional`, listw = wp_rsw, nsim = 999)
+mc_geary
+```
+
+The result of the simulation corroborates the previous Geary's C test with p-value less than 0.05 and Geary's C statistic less than 1.
+
+#### Visualizing Monte Carlo Geary's C
+
+```{r}
+summary(mc_geary$res)
+```
+
+```{r}
+hist(mc_geary$res,
+     freq = TRUE,
+     breaks = 20,
+     main = "Histogram of Geary's C Simulation",
+     xlab = "Simulated Geary's C")
+abline(v = 1, col = "red")
+```
+
+We can see that the min Geary's C is less than 1, while the max is greater than 1. The Geary's C data is approaching 0, meaning similar values are clustered. This result again is similar to Moran's I. We have areas with similar number of non-functional water points clustering together.
+
+## Spatial Correlogram with Moran's I
+
+We will use `sp.correlogram()` from spdep package to compute a 6-lag spatial correlogram of non-functional water points.
+
+```{r}
+MI_corr <- sp.correlogram(wp_k8, 
+                          nga_wp$`wpt non-functional`, 
+                          order=10, 
+                          method="I", 
+                          style="W")
+plot(MI_corr, main = "Moran's I Correlogram of Non-functional Water Points")
+```
+
+```{r}
+print(MI_corr)
+```
+
+The higher the lag value, the lower the estimation of Moran's I value. From lag 8, the values start to be dispersed with Moran's I estimation less than 0. Except for lag 7, we can reject the null hypothesis of spatial randomness for other lag values.
