@@ -20,7 +20,7 @@ Why is there a water crisis in Nigeria? To gain a perspective on the answer, we 
 
 ### Objective
 
-The objective of this exercise is to apply appropriate global and local measures of spatial Association techniques to reveals the spatial patterns of Not Functional water points in Nigeria.
+The objective of this exercise is to apply appropriate global and local measures of spatial association techniques to reveals the spatial patterns of non-functional water points in Nigeria.
 
 ## Setup
 
@@ -231,6 +231,8 @@ Because the geometry type of our geospatial data is `point`, we need to compute 
 
 -   `lengths()`: get the length of each element of a list or atomic vector as an integer or numeric vector, from Base R.
 
+After the aggregation, the output will in in polygon geometry shape.
+
 ```{r}
 #| eval: false
 nga_wp <- nga %>%
@@ -265,7 +267,7 @@ First, let's reload the `nga_wp.rds` file into our working environment.
 nga_wp <- read_rds("data/nga_wp.rds")
 ```
 
-### Distribution of non-functional water points
+### Displaying non-functional water points with choropleth map
 
 To create the plots, we will use the `tm_shape()` and `tm_fill()` functions from **tmap** package. In addition, `tm_borders()` and `tm_layout()` will be used to customize the style of the map. Below are the functionality of the functions.
 
@@ -331,7 +333,6 @@ wp_jenks <- tm_shape(nga_wp) +
 ```
 
 ```{r}
-#| echo: false
 wp_equal
 wp_pretty
 wp_jenks
@@ -342,6 +343,74 @@ From the maps above, we can see that different interval classification produces 
 
 `pretty` and `equal` methods divide the values into groups of equally-spaced values, so they can smooth out the distribution of non-functional water points.
 
+The `Jenks` method produces well-balanced intervals. By definition, the Jenks method defines intervals so that they have the smallest in-class variance. This makes the Jenks method more suitable for high-variance data sets like `nga_wp`.
+
 The `quantile` method produces a rather dire situation with a large area of land having the highest numbers of non-functional water points. However, the range of the highest quantile is relatively huge comparing to other quantiles, suggesting high variance data. We can say that the quantile method exaggerates the disfunctionality of water points in Nigeria due to outliers.
 
-The `Jenks` method produces well-balanced intervals. By definition, the Jenks method defines intervals so that they have the smallest in-class variance. This makes the Jenks method more suitable for high-variance data sets like `nga_wp`.
+#### Displaying data distribution with histogram
+
+To confirm the distribution of the data, we will use a histogram. From the histogram, it is clear that the data is highly skewed toward the right.
+
+```{r}
+hist(nga_wp$`wpt non-functional`, xlab = "Non-functional Water Point Count",
+     main = "Histogram of non-functional water points")
+```
+
+## Global Spatial Autocorrelation
+
+Based on the maps above, we see that there are some areas with a higher number of non-functional water points than others. Is there a pattern for the distribution of the non-functional water points or do they just occur randomly? To answer that question, we will explore the global spatial autocorrelation of non-functional water points in Nigeria.
+
+### Computing Spatial Weights
+
+Let's consider four spatial weight methods.
+
+-   **Polygon Contiguity**: this method defines the neighbor based on contiguity and is effective when the polygons are similar in size and distribution, and when spatial relationships are a function of polygon proximity. In this case, the size of the government areas of Nigeria have significantly varying sizes. Therefore, polygon contiguity is not a good fit.
+
+-   **Fixed Distance**: this method is effective for polygon data with large variation in polygon size (very large polygons at the edge of the study area, and very small polygons at the center of the study areas). On the map, we can see that Nigeria has very small government areas in the south, while bigger areas are scattered in the rest of the country, together with smaller areas in between. Therefore, the Fixed Distance method is not a good fit.
+
+-   **Inverse Distance:** this method is appropriate for with continuous data or to model the process where the closer the features are, the more likely they are going to interact/affect the other. The downside of this approach is that it considers every feature is potentially a neighbor of every other feature. Therefore, the method is computationally costly. Since our data set has up to 774 observations, this method is not appropriate considering the capability of our personal computer.
+
+-   **Adaptive Distance (K Nearest Neighbor):** this method is effective when the values associate with the features are skewed. Because our data is skewed to the right, this method is a good fit.
+
+#### Converting data into projected coordinate system
+
+Because Adaptive Distance spatial weight method is distance-based spatial weight method, the data needs to be converted into projected coordinate system. The EPSG code we will convert the data into is [EPSG:26391](https://epsg.io/26391), used for Nigeria West Belt. We will use `st_transform()` from the **sf** package for the task.
+
+```{r}
+nga_wp <- st_transform(nga_wp, crs = 26391)
+```
+
+#### Computing Adaptive Weight Matrix
+
+As a rule of thumb, when computing adaptive weight matrix, we should ensure that each feature has at least 8 neighbors. To do the task, the functions below are called:
+
+-   [`knn2nb()`](https://www.rdocumentation.org/packages/spdep/versions/1.2-7/topics/knn2nb): converts a **knn** object returned by **knearneigh** into a neighbors list of class **nb** with a list of integer vectors containing neighbor region number ids.
+
+-   [`knearneigh()`](https://r-spatial.github.io/spdep/reference/knearneigh.html): returns a matrix with the indices of points belonging to the set of the k nearest neighbours of each other.
+
+-   [`map_dbl()`](https://purrr.tidyverse.org/reference/map.html): returns an atomic vector of the indicative type.
+
+-   [`st_centroid()`](https://r-spatial.github.io/sf/reference/geos_unary.html): calculates and retrieve the centroid of the feature.
+
+-   [`cbind()`](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/cbind): merges two data frames/vectors/matrices together
+
+```{r}
+#Calculate the longitude and latitude
+longitude <- map_dbl(nga_wp$geometry, ~st_centroid(.x)[[1]])
+latitude <- map_dbl(nga_wp$geometry, ~st_centroid(.x)[[2]])
+coords <- cbind(longitude, latitude)
+wp_k8 <- knn2nb(knearneigh(coords, k = 8))
+```
+
+We can display the content of `wp_k8` matrix using `str()`. Each feature has 8 neighbors.
+
+```{r}
+str(wp_k8)
+```
+
+Now we can plot the adaptive spatial weight matrix.
+
+```{r}
+plot(nga_wp$geometry, border = "lightgrey")
+plot(wp_k8, coords, pch = 19, cex = 0.2, add = TRUE, col = "red")
+```

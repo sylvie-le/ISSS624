@@ -224,7 +224,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </ul></li>
   <li><a href="#visualizing-the-data" id="toc-visualizing-the-data" class="nav-link" data-scroll-target="#visualizing-the-data">Visualizing the Data</a>
   <ul class="collapse">
-  <li><a href="#distribution-of-non-functional-water-points" id="toc-distribution-of-non-functional-water-points" class="nav-link" data-scroll-target="#distribution-of-non-functional-water-points">Distribution of non-functional water points</a></li>
+  <li><a href="#displaying-non-functional-water-points-with-choropleth-map" id="toc-displaying-non-functional-water-points-with-choropleth-map" class="nav-link" data-scroll-target="#displaying-non-functional-water-points-with-choropleth-map">Displaying non-functional water points with choropleth map</a></li>
+  </ul></li>
+  <li><a href="#global-spatial-autocorrelation" id="toc-global-spatial-autocorrelation" class="nav-link" data-scroll-target="#global-spatial-autocorrelation">Global Spatial Autocorrelation</a>
+  <ul class="collapse">
+  <li><a href="#computing-spatial-weights" id="toc-computing-spatial-weights" class="nav-link" data-scroll-target="#computing-spatial-weights">Computing Spatial Weights</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -257,7 +261,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </section>
 <section id="objective" class="level3">
 <h3 class="anchored" data-anchor-id="objective">Objective</h3>
-<p>The objective of this exercise is to apply appropriate global and local measures of spatial Association techniques to reveals the spatial patterns of Not Functional water points in Nigeria.</p>
+<p>The objective of this exercise is to apply appropriate global and local measures of spatial association techniques to reveals the spatial patterns of non-functional water points in Nigeria.</p>
 </section>
 </section>
 <section id="setup" class="level2">
@@ -471,6 +475,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><p><code>st_intersects()</code>: spatial intersect predicate for stars and sfc object, from <strong>stars</strong> package, a sub-package of <strong>tmap</strong>.</p></li>
 <li><p><code>lengths()</code>: get the length of each element of a list or atomic vector as an integer or numeric vector, from Base R.</p></li>
 </ul>
+<p>After the aggregation, the output will in in polygon geometry shape.</p>
 <div class="cell">
 <details>
 <summary>Show code</summary>
@@ -510,8 +515,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>nga_wp <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">"data/nga_wp.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<section id="distribution-of-non-functional-water-points" class="level3">
-<h3 class="anchored" data-anchor-id="distribution-of-non-functional-water-points">Distribution of non-functional water points</h3>
+<section id="displaying-non-functional-water-points-with-choropleth-map" class="level3">
+<h3 class="anchored" data-anchor-id="displaying-non-functional-water-points-with-choropleth-map">Displaying non-functional water points with choropleth map</h3>
 <p>To create the plots, we will use the <code>tm_shape()</code> and <code>tm_fill()</code> functions from <strong>tmap</strong> package. In addition, <code>tm_borders()</code> and <code>tm_layout()</code> will be used to customize the style of the map. Below are the functionality of the functions.</p>
 <ul>
 <li><p><code>tm_shape</code>: creates a tmap element that specifies the spatial data object.</p></li>
@@ -575,25 +580,227 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </details>
 </div>
 <div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>wp_equal</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <p><img src="Take-home_Ex1_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
 </div>
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>wp_pretty</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <p><img src="Take-home_Ex1_files/figure-html/unnamed-chunk-24-2.png" class="img-fluid" width="672"></p>
 </div>
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>wp_jenks</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <p><img src="Take-home_Ex1_files/figure-html/unnamed-chunk-24-3.png" class="img-fluid" width="672"></p>
 </div>
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>wp_quantile</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <p><img src="Take-home_Ex1_files/figure-html/unnamed-chunk-24-4.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>From the maps above, we can see that different interval classification produces different map views.</p>
 <p><code>pretty</code> and <code>equal</code> methods divide the values into groups of equally-spaced values, so they can smooth out the distribution of non-functional water points.</p>
-<p>The <code>quantile</code> method produces a rather dire situation with a large area of land having the highest numbers of non-functional water points. However, the range of the highest quantile is relatively huge comparing to other quantiles, suggesting high variance data. We can say that the quantile method exaggerates the disfunctionality of water points in Nigeria due to outliers.</p>
 <p>The <code>Jenks</code> method produces well-balanced intervals. By definition, the Jenks method defines intervals so that they have the smallest in-class variance. This makes the Jenks method more suitable for high-variance data sets like <code>nga_wp</code>.</p>
+<p>The <code>quantile</code> method produces a rather dire situation with a large area of land having the highest numbers of non-functional water points. However, the range of the highest quantile is relatively huge comparing to other quantiles, suggesting high variance data. We can say that the quantile method exaggerates the disfunctionality of water points in Nigeria due to outliers.</p>
+<section id="displaying-data-distribution-with-histogram" class="level4">
+<h4 class="anchored" data-anchor-id="displaying-data-distribution-with-histogram">Displaying data distribution with histogram</h4>
+<p>To confirm the distribution of the data, we will use a histogram. From the histogram, it is clear that the data is highly skewed toward the right.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(nga_wp<span class="sc">$</span><span class="st">`</span><span class="at">wpt non-functional</span><span class="st">`</span>, <span class="at">xlab =</span> <span class="st">"Non-functional Water Point Count"</span>,</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Histogram of non-functional water points"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex1_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="global-spatial-autocorrelation" class="level2">
+<h2 class="anchored" data-anchor-id="global-spatial-autocorrelation">Global Spatial Autocorrelation</h2>
+<p>Based on the maps above, we see that there are some areas with a higher number of non-functional water points than others. Is there a pattern for the distribution of the non-functional water points or do they just occur randomly? To answer that question, we will explore the global spatial autocorrelation of non-functional water points in Nigeria.</p>
+<section id="computing-spatial-weights" class="level3">
+<h3 class="anchored" data-anchor-id="computing-spatial-weights">Computing Spatial Weights</h3>
+<p>Let’s consider four spatial weight methods.</p>
+<ul>
+<li><p><strong>Polygon Contiguity</strong>: this method defines the neighbor based on contiguity and is effective when the polygons are similar in size and distribution, and when spatial relationships are a function of polygon proximity. In this case, the size of the government areas of Nigeria have significantly varying sizes. Therefore, polygon contiguity is not a good fit.</p></li>
+<li><p><strong>Fixed Distance</strong>: this method is effective for polygon data with large variation in polygon size (very large polygons at the edge of the study area, and very small polygons at the center of the study areas). On the map, we can see that Nigeria has very small government areas in the south, while bigger areas are scattered in the rest of the country, together with smaller areas in between. Therefore, the Fixed Distance method is not a good fit.</p></li>
+<li><p><strong>Inverse Distance:</strong> this method is appropriate for with continuous data or to model the process where the closer the features are, the more likely they are going to interact/affect the other. The downside of this approach is that it considers every feature is potentially a neighbor of every other feature. Therefore, the method is computationally costly. Since our data set has up to 774 observations, this method is not appropriate considering the capability of our personal computer.</p></li>
+<li><p><strong>Adaptive Distance (K Nearest Neighbor):</strong> this method is effective when the values associate with the features are skewed. Because our data is skewed to the right, this method is a good fit.</p></li>
+</ul>
+<section id="converting-data-into-projected-coordinate-system" class="level4">
+<h4 class="anchored" data-anchor-id="converting-data-into-projected-coordinate-system">Converting data into projected coordinate system</h4>
+<p>Because Adaptive Distance spatial weight method is distance-based spatial weight method, the data needs to be converted into projected coordinate system. The EPSG code we will convert the data into is <a href="https://epsg.io/26391">EPSG:26391</a>, used for Nigeria West Belt. We will use <code>st_transform()</code> from the <strong>sf</strong> package for the task.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>nga_wp <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(nga_wp, <span class="at">crs =</span> <span class="dv">26391</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="computing-adaptive-weight-matrix" class="level4">
+<h4 class="anchored" data-anchor-id="computing-adaptive-weight-matrix">Computing Adaptive Weight Matrix</h4>
+<p>As a rule of thumb, when computing adaptive weight matrix, we should ensure that each feature has at least 8 neighbors. To do the task, the functions below are called:</p>
+<ul>
+<li><p><a href="https://www.rdocumentation.org/packages/spdep/versions/1.2-7/topics/knn2nb"><code>knn2nb()</code></a>: converts a&nbsp;<strong>knn</strong>&nbsp;object returned by&nbsp;<strong>knearneigh</strong>&nbsp;into a neighbors list of class&nbsp;<strong>nb</strong>&nbsp;with a list of integer vectors containing neighbor region number ids.</p></li>
+<li><p><a href="https://r-spatial.github.io/spdep/reference/knearneigh.html"><code>knearneigh()</code></a>: returns a matrix with the indices of points belonging to the set of the k nearest neighbours of each other.</p></li>
+<li><p><a href="https://purrr.tidyverse.org/reference/map.html"><code>map_dbl()</code></a>: returns an atomic vector of the indicative type.</p></li>
+<li><p><a href="https://r-spatial.github.io/sf/reference/geos_unary.html"><code>st_centroid()</code></a>: calculates and retrieve the centroid of the feature.</p></li>
+<li><p><a href="https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/cbind"><code>cbind()</code></a>: merges two data frames/vectors/matrices together</p></li>
+</ul>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Calculate the longitude and latitude</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>longitude <span class="ot">&lt;-</span> <span class="fu">map_dbl</span>(nga_wp<span class="sc">$</span>geometry, <span class="sc">~</span><span class="fu">st_centroid</span>(.x)[[<span class="dv">1</span>]])</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>latitude <span class="ot">&lt;-</span> <span class="fu">map_dbl</span>(nga_wp<span class="sc">$</span>geometry, <span class="sc">~</span><span class="fu">st_centroid</span>(.x)[[<span class="dv">2</span>]])</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>coords <span class="ot">&lt;-</span> <span class="fu">cbind</span>(longitude, latitude)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>wp_k8 <span class="ot">&lt;-</span> <span class="fu">knn2nb</span>(<span class="fu">knearneigh</span>(coords, <span class="at">k =</span> <span class="dv">8</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>We can display the content of <code>wp_k8</code> matrix using <code>str()</code>. Each feature has 8 neighbors.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(wp_k8)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>List of 774
+ $ : int [1:8] 2 321 364 548 597 624 721 725
+ $ : int [1:8] 1 321 548 597 624 721 725 726
+ $ : int [1:8] 241 250 261 447 492 507 509 526
+ $ : int [1:8] 12 20 257 263 446 454 466 690
+ $ : int [1:8] 203 208 286 288 331 334 539 738
+ $ : int [1:8] 170 217 218 337 379 553 577 601
+ $ : int [1:8] 8 176 214 281 283 306 544 555
+ $ : int [1:8] 7 214 281 306 327 544 555 651
+ $ : int [1:8] 18 19 218 337 574 576 601 757
+ $ : int [1:8] 25 216 325 364 365 528 552 632
+ $ : int [1:8] 26 27 43 68 191 524 565 762
+ $ : int [1:8] 135 263 417 429 446 454 690 695
+ $ : int [1:8] 31 37 211 320 393 570 583 584
+ $ : int [1:8] 170 363 379 546 563 577 581 589
+ $ : int [1:8] 22 49 82 177 297 306 580 623
+ $ : int [1:8] 30 187 188 296 328 357 360 635
+ $ : int [1:8] 35 275 295 378 460 591 638 639
+ $ : int [1:8] 9 19 218 376 574 576 601 757
+ $ : int [1:8] 9 18 56 103 376 574 576 601
+ $ : int [1:8] 4 106 125 239 263 419 454 466
+ $ : int [1:8] 60 61 162 269 520 578 596 626
+ $ : int [1:8] 49 297 326 443 515 623 682 693
+ $ : int [1:8] 54 291 292 536 537 614 618 619
+ $ : int [1:8] 84 123 437 476 527 652 673 761
+ $ : int [1:8] 10 181 216 314 325 366 552 730
+ $ : int [1:8] 11 27 68 191 336 439 562 762
+ $ : int [1:8] 11 26 191 439 562 565 663 762
+ $ : int [1:8] 29 178 299 300 301 358 369 598
+ $ : int [1:8] 172 173 178 182 358 378 460 591
+ $ : int [1:8] 16 39 41 186 192 329 357 360
+ $ : int [1:8] 13 37 211 289 561 570 583 584
+ $ : int [1:8] 51 62 461 462 515 623 682 693
+ $ : int [1:8] 47 166 227 238 242 655 743 750
+ $ : int [1:8] 42 104 136 137 213 553 559 757
+ $ : int [1:8] 17 275 276 277 278 279 295 460
+ $ : int [1:8] 50 107 247 408 432 455 681 759
+ $ : int [1:8] 38 40 211 212 570 583 584 629
+ $ : int [1:8] 30 39 40 41 186 192 320 570
+ $ : int [1:8] 30 38 40 41 186 192 320 329
+ $ : int [1:8] 37 38 39 41 186 192 320 570
+ $ : int [1:8] 30 38 39 40 186 192 360 634
+ $ : int [1:8] 86 136 137 499 587 613 718 734
+ $ : int [1:8] 11 68 157 524 549 565 590 645
+ $ : int [1:8] 16 45 192 290 303 328 360 634
+ $ : int [1:8] 44 187 290 303 328 341 360 599
+ $ : int [1:8] 387 417 429 438 459 521 668 742
+ $ : int [1:8] 33 111 166 234 238 691 698 750
+ $ : int [1:8] 65 113 265 386 407 428 482 701
+ $ : int [1:8] 22 32 297 326 515 623 682 693
+ $ : int [1:8] 36 98 107 247 409 416 432 681
+ $ : int [1:8] 32 62 461 462 515 580 623 693
+ $ : int [1:8] 53 78 165 293 532 602 603 636
+ $ : int [1:8] 52 78 80 165 280 602 621 636
+ $ : int [1:8] 23 79 293 294 532 536 537 618
+ $ : int [1:8] 122 169 246 333 430 571 605 697
+ $ : int [1:8] 77 368 376 533 534 576 601 728
+ $ : int [1:8] 53 58 199 312 322 323 621 622
+ $ : int [1:8] 57 322 323 564 602 603 621 622
+ $ : int [1:8] 88 128 129 259 493 700 714 748
+ $ : int [1:8] 61 158 563 578 589 592 596 626
+ $ : int [1:8] 21 60 269 578 589 592 596 626
+ $ : int [1:8] 32 51 461 462 515 623 682 693
+ $ : int [1:8] 90 237 384 416 467 497 765 772
+ $ : int [1:8] 48 65 74 113 131 265 386 407
+ $ : int [1:8] 48 64 74 113 265 407 683 701
+ $ : int [1:8] 19 103 104 288 331 338 351 574
+ $ : int [1:8] 347 348 560 566 567 609 640 694
+ $ : int [1:8] 11 43 157 190 191 549 590 645
+ $ : int [1:8] 140 146 248 274 473 500 512 513
+ $ : int [1:8] 71 298 299 301 341 343 344 610
+ $ : int [1:8] 70 172 173 298 299 343 344 625
+ $ : int [1:8] 17 361 566 567 568 609 638 639
+ $ : int [1:8] 72 361 374 377 404 607 665 666
+ $ : int [1:8] 65 109 113 251 265 683 741 754
+ $ : int [1:8] 110 272 398 422 433 485 501 768
+ $ : int [1:8] 254 287 427 459 470 547 647 677
+ $ : int [1:8] 56 195 533 534 579 618 619 728
+ $ : int [1:8] 52 54 79 80 165 215 532 636
+ $ : int [1:8] 54 78 165 293 532 579 618 636
+ $ : int [1:8] 52 53 78 165 215 280 636 739
+ $ : int [1:8] 99 145 227 233 426 483 689 760
+ $ : int [1:8] 15 32 49 51 177 352 580 623
+ $ : int [1:8] 132 258 383 414 433 529 767 768
+ $ : int [1:8] 24 131 148 386 437 482 673 692
+ $ : int [1:8] 105 156 267 394 654 675 707 712
+ $ : int [1:8] 42 136 137 499 587 613 718 734
+ $ : int [1:8] 149 151 221 226 399 410 486 657
+ $ : int [1:8] 59 116 128 150 489 648 700 714
+ $ : int [1:8] 260 408 463 542 674 676 681 759
+ $ : int [1:8] 63 163 236 237 384 452 710 765
+ $ : int [1:8] 160 271 388 406 473 475 492 525
+ $ : int [1:8] 95 119 390 391 392 423 487 656
+ $ : int [1:8] 73 354 374 402 594 607 665 666
+ $ : int [1:8] 13 31 60 158 436 561 596 709
+ $ : int [1:8] 92 390 391 392 405 423 469 656
+ $ : int [1:8] 97 139 389 403 420 451 488 653
+ $ : int [1:8] 96 168 389 420 451 653 662 773
+ $ : int [1:8] 50 117 153 231 409 432 696 708
+ $ : int [1:8] 81 145 426 483 667 689 760 769
+  [list output truncated]
+ - attr(*, "region.id")= chr [1:774] "1" "2" "3" "4" ...
+ - attr(*, "call")= language knearneigh(x = coords, k = 8)
+ - attr(*, "sym")= logi FALSE
+ - attr(*, "type")= chr "knn"
+ - attr(*, "knn-k")= num 8
+ - attr(*, "class")= chr "nb"</code></pre>
+</div>
+</div>
+<p>Now we can plot the adaptive spatial weight matrix.</p>
+<div class="cell">
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(nga_wp<span class="sc">$</span>geometry, <span class="at">border =</span> <span class="st">"lightgrey"</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wp_k8, coords, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.2</span>, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex1_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
 
 
+</section>
 </section>
 </section>
 
