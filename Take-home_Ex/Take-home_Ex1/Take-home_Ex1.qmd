@@ -417,10 +417,10 @@ plot(wp_k8, coords, pch = 19, cex = 0.2, add = TRUE, col = "red")
 
 #### Row standardized weight matrix
 
-We will compute a row standardized weight matrix based on `wp_k8` by using `nb2listw()` from **spdep** package.
+We will compute a row standardized weight matrix based on `wp_k8` by using `nb2listw()` from **spdep** package. Since the data has 774 observations, which is a high number, `style = "B"` is used for a more robust analysis.
 
 ```{r}
-wp_rsw <- nb2listw(wp_k8, style = "W", zero.policy = TRUE)
+wp_rsw <- nb2listw(wp_k8, style = "B", zero.policy = TRUE)
 wp_rsw
 ```
 
@@ -528,3 +528,191 @@ print(MI_corr)
 ```
 
 The higher the lag value, the lower the estimation of Moran's I value. From lag 8, the values start to be dispersed with Moran's I estimation less than 0. Except for lag 7, we can reject the null hypothesis of spatial randomness for other lag values.
+
+## Cluster and Outlier Analysis
+
+In this segment, we will examine the existence of clusters in the spatial arrangement of non-functional water points. The statistical method we will use is Local Indicators of Spatial Association, or LISA for short.
+
+### Computing local Moran's I
+
+To compute local Moran\'s I, the [*localmoran()*](https://r-spatial.github.io/spdep/reference/localmoran.html) function of **spdep** will be used. We will display the local Moran matrix using `printCoefmat()`.
+
+```{r}
+fips <- order(nga_wp$shapeName)
+localMI <- localmoran(nga_wp$`wpt non-functional`, wp_rsw)
+head(localMI)
+```
+
+### Mapping the local Moran's I
+
+Before mapping the local Moran's I, we will append the local Moran's dataframe `localMI` into `nga_wp` using `cbind()`.
+
+```{r}
+nga_wp.LMI <- cbind(nga_wp, localMI) %>% 
+  rename(Pr.Ii = Pr.z....E.Ii..)
+```
+
+Now we can map the local Moran's I statistics and their p-values.
+
+```{r}
+localMI.map <- tm_shape(nga_wp.LMI) +
+  tm_fill(col = "Ii",
+          style = "pretty",
+          title = "Local Moran Stats") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(legend.height = 0.25,
+            legend.width = 0.3)
+
+pvalueMI <- tm_shape(nga_wp.LMI) +
+  tm_fill(col = "Pr.Ii",
+          breaks = c(-Inf, 0.001, 0.01, 0.05, 0.1, Inf),
+          palette = "-Blues",
+          title = "Local Moran p-value") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(legend.height = 0.25,
+            legend.width = 0.3)
+
+tmap_arrange(localMI.map, pvalueMI, asp = 1, ncol = 2)
+```
+
+Where p-values are less than 0.05, we can reject the null hypothesis of local spatial randomness. The areas with darker color on the p-value map is where the observations of non-functional water points are not distributed randomly.
+
+## LISA Cluster Map
+
+### Plotting Moran scatterplots
+
+With Moran scatterplot, we can see the relationship between the value of the chosen attribute at each location and the average value of the same attribute at neighboring locations. The Moran scatterplot is drawn using `moran.plot()` from **spdep** package.
+
+Two scatterplots will be drawn. One with non-standardized variable and the other one with standardized variable.
+
+First, we will use scale to standardize the variables.
+
+```{r}
+nga_wp$Z.wptnon <- scale(nga_wp$`wpt non-functional`) %>% 
+  as.vector
+```
+
+The two scatterplots are drafted as below.
+
+```{r}
+nci <- moran.plot(nga_wp$`wpt non-functional`, wp_rsw,
+                  labels = FALSE, 
+                  xlab = "Non-functional Water Points", 
+                  ylab = "Spatially Lag Non-functional Water Points")
+
+nci2 <- moran.plot(nga_wp$Z.wptnon, wp_rsw,
+                   labels = FALSE,
+                   xlab = "z-Nonfunctional Water Points",
+                   ylab = "Spatially Lag z-Nonfunctional Water Points")
+```
+
+We can see that there are many observations in the high-high and low-high regions. We also have some observations in the high-low region. Let's use the choropleth map to see more!
+
+### Plotting LISA map
+
+Before drawing the map, we need to prepare the data so that the observations are grouped into the four classes (quadrants) as displayed in the scatterplots.
+
+```{r}
+quadrant <- vector(mode = "numeric", length = nrow(localMI))
+nga_wp$lag_wptnon <- lag.listw(wp_rsw, nga_wp$`wpt non-functional`)
+DV <- nga_wp$lag_wptnon - mean(nga_wp$lag_wptnon)
+LM_I <- localMI[,1] - mean(localMI[,1])
+signif <- 0.5
+quadrant[DV <0 & LM_I>0] <- 1
+quadrant[DV >0 & LM_I<0] <- 2
+quadrant[DV <0 & LM_I<0] <- 3  
+quadrant[DV >0 & LM_I>0] <- 4
+quadrant[localMI[,5]>signif] <- 0
+```
+
+Below is the LISA map in comparison with the aggregate map of non-functional water point count. For the aggregate map, we will display `wp_jenks`, which is based on Jenks classification.
+
+```{r}
+nga_wp.LMI$quadrant <- quadrant
+colors <- c("#ffffff", "#2c7bb6", "#abd9e9", "#fdae61", "#d7191c")
+clusters <- c("insignificant", "low-low", "low-high", "high-low", "high-high")
+
+LISAmap <- tm_shape(nga_wp.LMI) +
+  tm_fill(col = "quadrant", 
+          style = "cat", 
+          palette = colors[c(sort(unique(quadrant)))+1], 
+          labels = clusters[c(sort(unique(quadrant)))+1],
+          popup.vars = c("")) +
+  tm_view(set.zoom.limits = c(11,17)) +
+  tm_borders(alpha=0.5) +
+  tm_layout(main.title = "LISA Map",
+            main.title.size = 1,
+            main.title.position = "center",
+            legend.height = 0.25,
+            legend.width = 0.3)
+
+wp_jenks1 <- wp_jenks + tm_layout(main.title = "Aggregated Map (Jenks)",
+                                  main.title.size = 1,
+                                  frame = TRUE)
+
+tmap_arrange(wp_jenks1, LISAmap, 
+             asp=1, ncol=2)
+```
+
+The LISA map highlight the areas where spatial autocorrelation is statistically significant. The red polygons depict clusters of government areas that have a high number of non-functional water points. They are surrounded by clusters of low number of non-functional water points. The blue polygons are clusters of areas with low number of non-functional water points. Except for the east regions, those areas are surrounded by clusters of areas with more non-functional water points, which are shown in orange.
+
+By comparing the LISA map with the aggregated map, we can see that the LISA map highlights the pattern of non-functional water points distribution better, especially when we want to compare how area clusters are different from their neighbors.
+
+Interestingly enough, the low-low areas in the north east overlap with the states that have lower population density. The small orange dot in the east is Maiduguri, the largest city in north-eastern Nigeria. In contrast, Lagos, the largest city of Nigeria lying on the south western coast, belongs to the low-low category. This Lagos pattern repeats in the northern city of Kano, Nigeria's second largest city.
+
+## Hot Spot and Cold Spot Analysis
+
+An alternative to detect spatial anomalies besides Moran's I LISA is Getis and Ord's G-statistics. This method is distance-based as it looks into areas within a predefined proximity and identifies if high/low values cluster spatially. Statistically areas of high values are considered hot spots, while areas with low values are considered cold spots.
+
+### Computing Gi statistics
+
+Before we can map the hot-and-cold-spot map, let's calculate the Gi statistics using the adaptive distance weight method. The functions used are [`localG()`](https://www.rdocumentation.org/packages/spdep/versions/1.1-3/topics/localG) from **spdep**. `localG()` calculates the spatial statistic G, returning a Z-value vector. The higher the Z-value, the higher the clustering intensity. Positive and negative Z-score means high an low clusters, respectively.
+
+After the Z-value vector is calculated, we convert it into an r matrix, then use `cbind()` to append it to `nga_wp`. We also rename `as.matrix.gi.adaptive.` to `gstat_adaptive` for easier reference.
+
+```{r}
+fips <- order(nga_wp$shapeName)
+gi.adaptive <- localG(nga_wp$`wpt non-functional`, wp_rsw)
+wp_gi <- cbind(nga_wp, as.matrix(gi.adaptive)) %>% 
+  rename(gstat_adaptive = as.matrix.gi.adaptive.)
+```
+
+### Mapping Gi values
+
+```{r}
+Gimap <- tm_shape(wp_gi) + 
+  tm_fill(col = "gstat_adaptive", 
+          style = "pretty", 
+          palette="-RdBu", 
+          title = "local Gi") + 
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "Gi Map",
+            main.title.size = 1,
+            main.title.position = "center",
+            legend.height = 0.25,
+            legend.width = 0.3)
+
+tmap_arrange(wp_jenks1, Gimap, asp = 1, ncol = 2)
+```
+
+With GI map, we can see the intensity of the cluster values. The Gi map have some hot spots that overlap with the areas containing high number of non-functional water points on the aggregate map. What is interesting is that Gi map shows the "temperature" of those areas in relations with their neighbors.
+
+## Comparing LISA and Gi Maps
+
+```{r}
+tmap_arrange(LISAmap, Gimap, asp = 1, ncol = 2)
+```
+
+There are some difference in how each method define clusters of similarly high number of non-functional water points by area. However, there are also overlaps between the two maps. LISA map is more effective when we want to display the contrast between the clusters and how they allocate, while Gi map can be used to depict the intensity of the cluster and values.
+
+## Conclusion and Improvement
+
+Based on the LISA and Gi map, there is a consistent pattern of areas with high values of non-functional water points. Those areas with high number of water point malfunctions often cluster together, suggesting the effect of unknown factors affecting the quality of water points.
+
+The blue areas regions lead to two hypothesis:
+
+-   The blue areas in the south overlap with the Niger Delta. Do the presence of rivers and subsequent infrastructures affect the quality and maintenance of water points?
+
+-   The blue areas in the north east overlap with the states that have low population density. Could it be that low population density leading to less water points installation or less usage, which leading to them malfunction less?
+
+More data can be collected to determine the correlation of other variable with non-functional water points. There are many potential to continue on identifying the factors that affect water point functionality. Who knows, maybe we will find some solutions to improve Nigerians' access to fresh water 💧
