@@ -61,7 +61,6 @@ The data from WPdx Global Data Repositories comes in four files in dbf, prj, shp
 Using `st_read()` from the **sf** package, we import the aspatial data into our working environment. The data is imported as a simple feature data table.
 
 ```{r}
-#| eval: false
 wp <- st_read(dsn = "data", layer = "geo_export")
 ```
 
@@ -70,7 +69,6 @@ wp <- st_read(dsn = "data", layer = "geo_export")
 The data from Geoboundaries comes in six files in dbf, geojson, prj, shp, shx, topojson formats. The files are renamed to `NGA-ADM2` for easier reference. To import these files as a simple feature data table, we also use `st_read().`
 
 ```{r}
-#| eval: false
 nga <- st_read(dsn = "data", layer = "NGA-ADM2")
 ```
 
@@ -91,14 +89,12 @@ The goals of this step include:
 First, we use `st_geometry()` to check the geometry list column of `wp`. There are 406,566 observations under the WGS84 coordinate reference system (CRS). Let's take notes that the geometry type is `point` 🔑
 
 ```{r}
-#| eval: false
 st_geometry(wp)
 ```
 
 Since the shapefile is in WGS84 CRS, we will assign `crs = 4326` to `wp`. 4326 is the code of WGS84 in EPSG code. The task is conducted using `st_set_crs()`.
 
 ```{r}
-#| eval: false
 wp <- st_set_crs(wp, 4326)
 ```
 
@@ -107,28 +103,24 @@ wp <- st_set_crs(wp, 4326)
 Next, we will examine the attributes in the data table using `glimpse()` from **dplyr**.
 
 ```{r}
-#| eval: false
 glimpse(wp)
 ```
 
 We notice that in the `clean_coun` column, there are many countries name such as Malawi, Ghana, Sierra Leone, etc. This means that the `wp` data set contains the information of other countries besides Nigeria. `filter()` of the package **dplyr** is used to get the data that only belongs to Nigeria.
 
 ```{r}
-#| eval: false
 wp <- wp %>% filter(clean_coun == "Nigeria")
 ```
 
 Now we will examine the filtered `wp` data set using `head()` of Base R. The function reveals that `wp` now only contains Nigeria-relevant data.
 
 ```{r}
-#| eval: false
 head(wp, n = 5)
 ```
 
 Now we will write the filtered data table into a new `rds` file named `wp_nga` using the `write_rds()` function from the **sf** package.
 
 ```{r}
-#| eval: false
 write_rds(wp, "data/wp_nga.rds")
 ```
 
@@ -143,7 +135,6 @@ To preserve the existing variables while adding new ones, `mutate()` from the **
 All changes are written into the `wp_nga` file using `read_rds()`.
 
 ```{r}
-#| eval: false
 wp_nga <- read_rds("data/wp_nga.rds") %>%
   mutate(status_cle = replace_na(status_cle, "Unknown"))
 ```
@@ -151,7 +142,6 @@ wp_nga <- read_rds("data/wp_nga.rds") %>%
 Let's look at the distribution of `status_cle`. We will use `freq()` from the **funModeling** package for this task.
 
 ```{r}
-#| eval: false
 freq(data=wp_nga, 
      input = 'status_cle')
 ```
@@ -159,7 +149,6 @@ freq(data=wp_nga,
 We can see that there are two variables that carry the same meaning: *Non-Functional due to dry season* and *Non functional due to dry season*. We will use `replace()` from **dplyr** to do this task.
 
 ```{r}
-#| eval: false
 wp_nga <- read_rds("data/wp_nga.rds") %>%
   mutate(status_cle = replace(status_cle, status_cle == "Non functional due to dry season", "Non-Functional due to dry season")) %>%
   mutate(status_cle = replace_na(status_cle, "Unknown"))
@@ -168,7 +157,6 @@ wp_nga <- read_rds("data/wp_nga.rds") %>%
 Let's re-examine the distribution of `status_cle`.
 
 ```{r}
-#| eval: false
 freq(data=wp_nga, 
      input = 'status_cle')
 ```
@@ -178,7 +166,6 @@ freq(data=wp_nga,
 Non-functional water points are defined as those which are not functional or abandoned. Using `filter()` from the dplyr package, we will save the non-functional water point data into a simple feature data table named `wpt_nonfunctional`.
 
 ```{r}
-#| eval: false
 wpt_nonfunctional <- wp_nga %>%
   filter(status_cle %in%
            c("Abandoned/Decommissioned", 
@@ -190,7 +177,6 @@ wpt_nonfunctional <- wp_nga %>%
 Now we can inspect the distribution of non-functional water points by type using `freq()`.
 
 ```{r}
-#| eval: false
 freq(data = wpt_nonfunctional, input = "status_cle")
 ```
 
@@ -201,14 +187,12 @@ freq(data = wpt_nonfunctional, input = "status_cle")
 We will check the CRS of `nga` using `st_geometry()`.
 
 ```{r}
-#| eval: false
 st_geometry(nga)
 ```
 
 As the CRS of `nga` is WGS84, we will assign `crs = 4326` using `st_set_crs()`.
 
 ```{r}
-#| eval: false
 nga <- st_set_crs(nga, 4326)
 ```
 
@@ -217,7 +201,6 @@ Next, we plot the geometry using `plot()` of Base R. As our data is the regions 
 From the map, it is noticeable that the size of government areas varies significantly. Let's keep this in mind for further analysis 💪
 
 ```{r}
-#| eval: false
 plot(st_geometry(nga))
 ```
 
@@ -234,7 +217,6 @@ Because the geometry type of our geospatial data is `point`, we need to compute 
 After the aggregation, the output will in in polygon geometry shape.
 
 ```{r}
-#| eval: false
 nga_wp <- nga %>%
   mutate(`total wpt` = lengths(
     st_intersects(nga, wp_nga))) %>% 
@@ -247,7 +229,6 @@ nga_wp <- nga %>%
 Before saving the data table, we will compute the percentage of non-functional water points over the total number of water points in Nigeria.
 
 ```{r}
-#| eval: false
 nga_wp <- nga_wp %>% 
   mutate(`pct_non-functional` = `wpt non-functional`/`total wpt`)
 ```
@@ -255,7 +236,6 @@ nga_wp <- nga_wp %>%
 Now, we will save the sf data table `nga_wp` into a new rds file.
 
 ```{r}
-#| eval: false
 write_rds(nga_wp, "data/nga_wp.rds")
 ```
 
