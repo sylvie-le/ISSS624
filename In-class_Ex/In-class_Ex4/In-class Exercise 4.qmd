@@ -174,7 +174,7 @@ corrplot(cor(st_drop_geometry(condo_resale.sf[, 3:21])), diag = FALSE, order = "
          tl.pos = "td", tl.cex = 0.5, method = "number", type = "upper")
 ```
 
-Matrix reorder is very important for mining the hiden structure and patter in the matrix. There are four methods in corrplot (parameter order), named \"AOE\", \"FPC\", \"hclust\", \"alphabet\". In the code chunk above, AOE order is used. It orders the variables by using the *angular order of the eigenvectors* method suggested by [Michael Friendly](https://www.datavis.ca/papers/corrgram.pdf).
+Matrix reorder is very important for mining the hiden structure and patter in the matrix. There are four methods in corrplot (parameter order), named "AOE", "FPC", "hclust", "alphabet". In the code chunk above, AOE order is used. It orders the variables by using the *angular order of the eigenvectors* method suggested by [Michael Friendly](https://www.datavis.ca/papers/corrgram.pdf).
 
 From the plot above, we can see that `LEASE_99YEAR` and `Freehold` are highly correlated. We will not include `LEASE_99YEAR` in the modeling.
 
