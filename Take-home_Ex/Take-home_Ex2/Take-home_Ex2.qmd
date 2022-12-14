@@ -645,6 +645,29 @@ nigeria_sf_cluster <- cbind(nga_wp, as.matrix(groups)) %>%
   rename(`CLUSTER`=`as.matrix.groups.`)
 ```
 
+### Visualizing hierarchy clusters in choropleth map
+
+```{r}
+hier_clust <- tm_shape(nigeria_sf_cluster) + 
+  tm_fill("CLUSTER",
+          title = "Hierarchical Clusters") +
+  tm_layout(main.title = "Hierarchical Cluster Map",
+            main.title.position = "center",
+            main.title.size = 1.4,
+            legend.height = 0.25,
+            legend.width = 0.3,
+            legend.position = c("right", "bottom"),
+            frame = FALSE) +
+  tm_borders(alpha = 0.5)
+hier_clust
+```
+
+There are notes to take here:
+
+-   The clusters are dispersing. We can see that there are areas of cluster 8 and cluster 5 being group together, but there are groups that are far away from each other. Other clusters are scattered all around Nigeria. This is because the hierarchical clustering method is not spatially constrained.
+
+-   There are some white gaps on the map, which are the zero-water-point LGAs that we removed. To better visualize Nigeria, we can add them back to our mapping data table as a pseudo cluster.
+
 ## Spatially Constrained Clustering: SKATER
 
 SKATER is a spatially constrained clustering method based on the contiguity of the geospatial units. It uses the Tree Edge Removal algorithm to construct minimum spanning tree from adjacency graph, achieving maximum internal homogeneity within the cluster.
