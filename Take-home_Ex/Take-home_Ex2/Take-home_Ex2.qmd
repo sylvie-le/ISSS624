@@ -28,8 +28,6 @@ Take-home Exercise 2 is a continuation of [Take-home Exercise 1](https://isss624
 
 -   Percentage of rural water points
 
--   Percentage of water source (i.e. Well)
-
 ## Setup
 
 ### Data
