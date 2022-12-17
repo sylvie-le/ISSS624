@@ -1,0 +1,279 @@
+---
+title: "In-class Exercise 5: Logistic Regression for Water Points in Osun (Nigeria)"
+editor: visual
+execute: 
+  warning: false
+  error: false
+---
+
+## Overview
+
+In this exercise, we will build an explanatory model of the water point status in the state of Osun - Nigeria.
+
+## The Data
+
+Two files will be used in this exercise:
+
+-   **Osun.rds**: the aspatial data of water point status and their attributes
+
+-   **Osun_wp_sf.rds**: the gespatial data of the Osun state
+
+## Variables
+
+Dependent variable: water point status (i.e. functional/non-functional)
+
+Independent variables:
+
+-   distance_to_primary_road
+
+-   distance_to_secondary_road
+
+-   distance_to_tertiary_road
+
+-   distance_to_city
+
+-   distance_to_town
+
+-   water_point_population
+
+-   local_population_1km
+
+-   usage_capacity
+
+-   is_urban
+
+-   water_source_clean
+
+## Getting Started
+
+### Importing necessary packages
+
+```{r}
+pacman::p_load(sf, tidyverse, funModeling, blorr,
+               corrplot, ggpubr, spdep, GWmodel,
+               tmap, skimr, caret, report)
+```
+
+### **Importing files**
+
+First, we import the geospatial data of Osun's LGAs.
+
+```{r}
+osun <- read_rds("data/Osun.rds")
+```
+
+Secondly, we import the aspatial data of water point status and attributes in Osun. The observations with \`status
+
+```{r}
+osun_wp_sf <- read_rds("data/Osun_wp_sf.rds")
+```
+
+## EDA
+
+Let's check the status distribution of the water points using `freq()`.
+
+```{r}
+osun_wp_sf %>% 
+  freq(input = "status")
+```
+
+Now we view the map of Osun.
+
+```{r}
+tmap_mode("view")
+tm_shape(osun) +
+  tm_polygons(alpha = 0.4) +
+  tm_shape(osun_wp_sf) +
+  tm_dots(col = "status",
+          alpha = 0.6) +
+  tm_view(set.zoom.limits = c(9,12))
+```
+
+```{r}
+tmap_mode("plot")
+```
+
+We use `skim()` from **skimr** to view the distribution of the variables.
+
+```{r}
+osun_wp_sf %>% 
+  skim()
+```
+
+We can see that there are some variables with a lot of missing values. We will exclude them from our analysis.
+
+```{r}
+osun_wp_sf_clean <- osun_wp_sf %>% 
+  filter_at(vars(status,
+                 distance_to_primary_road,
+                 distance_to_secondary_road,
+                 distance_to_tertiary_road,
+                 distance_to_city,
+                 distance_to_town,
+                 water_point_population,
+                 local_population_1km,
+                 usage_capacity,
+                 is_urban,
+                 water_source_clean),
+            all_vars(!is.na(.))) %>% 
+  mutate(usage_capacity = as.factor(usage_capacity))
+```
+
+## Correlation Analysis
+
+```{r}
+osun_wp <- osun_wp_sf_clean %>% 
+  select(c(7,35:39,42:43,46:47,57)) %>% 
+  st_set_geometry(NULL)
+```
+
+```{r}
+cluster_vars.cor = cor(
+  osun_wp[,2:7])
+corrplot.mixed(cluster_vars.cor,
+               lower = "ellipse",
+               upper = "number",
+               tl.pos = "lt",
+               diag = "l",
+               tl.col = "black")
+```
+
+## Logistic Regression Model
+
+```{r}
+model <- glm(status ~ distance_to_primary_road +
+               distance_to_secondary_road +
+               distance_to_tertiary_road +
+               distance_to_city +
+               distance_to_town +
+               is_urban +
+               usage_capacity +
+               water_source_clean +
+               water_point_population +
+               local_population_1km,
+             data = osun_wp_sf_clean,
+             family = binomial(link = "logit"))
+```
+
+```{r}
+blr_regress(model)
+```
+
+We use the code chunk below to view the confusion matrix of the model.
+
+```{r}
+blr_confusion_matrix(model, cutoff = 0.5)
+```
+
+Now we need to change our data table from simple feature data frame to spatial point data frame.
+
+```{r}
+osun_wp_sp <- osun_wp_sf_clean %>% 
+  select(c(status,
+           distance_to_primary_road,
+           distance_to_secondary_road,
+           distance_to_tertiary_road,
+           distance_to_city,
+           distance_to_town,
+           water_point_population,
+           local_population_1km,
+           is_urban,
+           usage_capacity,
+           water_source_clean)) %>% 
+  as_Spatial()
+```
+
+```{r}
+bw.fixed <- bw.ggwr(status ~
+                      distance_to_primary_road +
+                      distance_to_secondary_road +
+                      distance_to_tertiary_road +
+                      distance_to_city +
+                      distance_to_town +
+                      water_point_population +
+                      local_population_1km +
+                      is_urban +
+                      usage_capacity +
+                      water_source_clean,
+                    data = osun_wp_sp,
+                    family = "binomial",
+                    approach = "AIC",
+                    kernel = "gaussian",
+                    adaptive = FALSE,
+                    longlat = FALSE)
+```
+
+```{r}
+bw.fixed
+```
+
+## Geography Weighted Regression Model
+
+Now we do the geography weighted regression (gwRM)
+
+```{r}
+gwlr.fixed <- ggwr.basic(status ~ distance_to_primary_road +
+                           distance_to_secondary_road +
+                           distance_to_tertiary_road +
+                           distance_to_city +
+                           distance_to_town +
+                           water_point_population +
+                           local_population_1km +
+                           is_urban +
+                           usage_capacity +
+                           water_source_clean,
+                         data = osun_wp_sp,
+                         bw = bw.fixed,
+                         family = "binomial",
+                         kernel = "gaussian",
+                         adaptive = FALSE,
+                         longlat = FALSE)
+```
+
+To evaluate the performance of the gwRM, we need to convert it into data frame.
+
+```{r}
+gwr.fixed <- as.data.frame(gwlr.fixed$SDF)
+```
+
+Next, we will label yhat values greater or equal to 0.5 into 1 and else 0. The result of the logic comparison operation will be saved into a field called most.
+
+```{r}
+gwr.fixed <- gwr.fixed %>% 
+  mutate(most = ifelse(
+    gwr.fixed$yhat >= 0.5, T, F))
+```
+
+```{r}
+gwr.fixed$y <- as.factor(gwr.fixed$y)
+gwr.fixed$most <- as.factor(gwr.fixed$most)
+CM <- confusionMatrix(data = gwr.fixed$most, reference = gwr.fixed$y)
+CM
+```
+
+When we compare `CM` with `model`, we can see that `CM` has better performance in terms of many parameters including accuracy, sensitivity, and specificity.
+
+```{r}
+osun_wp_sf_selected <- osun_wp_sf_clean %>% 
+  select(c(ADM2_EN, ADM2_PCODE,
+           ADM1_EN, ADM1_PCODE, status))
+gwr_sf.fixed <- cbind(osun_wp_sf_selected, gwr.fixed)
+```
+
+Let's review our `CM` model in an interactive map.
+
+```{r}
+tmap_mode("view")
+prob_T <- tm_shape(osun) +
+  tm_polygons(alpha = 0.1) +
+  tm_shape(gwr_sf.fixed) +
+  tm_dots(col = "yhat",
+          border.col = "gray60",
+          border.lwd = 1) +
+  tm_view(set.zoom.limits = c(8,14))
+prob_T
+```
+
+```{r}
+tmap_mode("plot")
+```
