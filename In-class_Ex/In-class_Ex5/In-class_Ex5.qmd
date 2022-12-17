@@ -165,13 +165,11 @@ We use the code chunk below to view the confusion matrix of the model.
 blr_confusion_matrix(model, cutoff = 0.5)
 ```
 
-Now we need to change our data table from simple feature data frame to spatial point data frame.
+Now we need to change our data table from simple feature data frame to spatial point data frame. We need to remove the variables with p-value greater than 0.05, which are `distance_to_primary_road` and `distance_to_secondary_road`. Those are the values that do not contribute to our model at the 95% confidence interval.
 
 ```{r}
 osun_wp_sp <- osun_wp_sf_clean %>% 
   select(c(status,
-           distance_to_primary_road,
-           distance_to_secondary_road,
            distance_to_tertiary_road,
            distance_to_city,
            distance_to_town,
@@ -185,8 +183,6 @@ osun_wp_sp <- osun_wp_sf_clean %>%
 
 ```{r}
 bw.fixed <- bw.ggwr(status ~
-                      distance_to_primary_road +
-                      distance_to_secondary_road +
                       distance_to_tertiary_road +
                       distance_to_city +
                       distance_to_town +
@@ -212,8 +208,7 @@ bw.fixed
 Now we do the geography weighted regression (gwRM)
 
 ```{r}
-gwlr.fixed <- ggwr.basic(status ~ distance_to_primary_road +
-                           distance_to_secondary_road +
+gwlr.fixed <- ggwr.basic(status ~
                            distance_to_tertiary_road +
                            distance_to_city +
                            distance_to_town +
